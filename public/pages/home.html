@@ -1,90 +1,239 @@
-<!--
-Draw.it
-Copyright (C) 2021 Various Authors
-
-This program is free software: you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation, either version 3 of the License, or
-(at your option) any later version.
-
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License
-along with this program. If not, see <https://www.gnu.org/licenses/>.
--->
-
 <!DOCTYPE html>
 <html lang="en">
 
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <link rel="stylesheet" href="../styles/home.css">
-  <link rel="stylesheet" href="../styles/modal.css">
+  <link rel="stylesheet" href="../styles/home.css" />
+  <link rel="stylesheet" href="../styles/modal.css" />
+  <link rel="stylesheet" href="../styles/sketchy-theme.css" />
+  <link rel="icon" href="../img/game/icon.png" type="image/png">
   <title>Draw.it</title>
 </head>
 
 <body>
   <div id="header">
-    <h1>Draw.IT</h1>
+    <div class="logo-container">
+      <img src="../img/game/icon.png" alt="Draw.it Logo" class="game-logo">
+      <h1>Draw.it</h1>
+    </div>
+  </div>
+
+  <!-- Tutorial Slideshow -->
+  <div class="tutorial-container">
+    <div class="tutorial-header">How to Play</div>
+    <div class="slideshow">
+      <div class="slide active">
+        <div class="slide-content">
+          <h2>Welcome to Draw.it!</h2>
+          <p>Draw.it is a fun drawing and guessing game you can play with friends. Create a room or join an existing one to get started!</p>
+          <img src="../img/game/icon.png" alt="Draw.it Logo" class="slide-image">
+        </div>
+      </div>
+      <div class="slide">
+        <div class="slide-content">
+          <h2>Guessing Mode</h2>
+          <p>In Guessing Mode, one player draws a word while others try to guess it. The faster you guess, the more points you earn!</p>
+          <img src="../img/game/play.png" alt="Guessing Mode" class="slide-image">
+        </div>
+      </div>
+      <div class="slide">
+        <div class="slide-content">
+          <h2>Copycat Mode</h2>
+          <p>In Copycat Mode, everyone draws in the first round. Then in subsequent rounds, you'll try to copy someone else's drawing from memory!</p>
+          <img src="../img/game/play.png" alt="Copycat Mode" class="slide-image">
+        </div>
+      </div>
+      <div class="slide">
+        <div class="slide-content">
+          <h2>Creating a Room</h2>
+          <p>Click "Create Room", choose your character, and enter a nickname. Share the room code with friends so they can join!</p>
+        </div>
+      </div>
+      <div class="slide">
+        <div class="slide-content">
+          <h2>Joining a Room</h2>
+          <p>Click "Join Room", enter the room code, choose your character, and enter a nickname. Then click "Ready" when you're set to play!</p>
+        </div>
+      </div>
+    </div>
+    <div class="slide-dots">
+      <span class="dot active" data-slide="0"></span>
+      <span class="dot" data-slide="1"></span>
+      <span class="dot" data-slide="2"></span>
+      <span class="dot" data-slide="3"></span>
+      <span class="dot" data-slide="4"></span>
+    </div>
+    <div class="slide-nav">
+      <button id="prev-slide">Previous</button>
+      <button id="next-slide">Next</button>
+    </div>
   </div>
 
   <div class="options">
     <div class="roomOptions">
-      <button class="roomBtn" id="joinBtn">Join Room</button>
       <button class="roomBtn" id="createBtn">Create Room</button>
+      <button class="roomBtn" id="joinBtn">Join Room</button>
     </div>
   </div>
 
-  <div id="joinRoomModal" class="modal">
-    <div class="modal-content">
-      <div class="modal-header">
-        <span style="background-color:#8F00FF" class="close cancelModal">&times;</span>
-        <h2>Join Room</h2>
-      </div>
-      <div class="modal-body">
-        <label for="nicknameIpt">Nickname</label>
-        <input type="text" class="modalInput" id="joinNicknameIpt">
-        <label for="roomCodeIpt">Room Code</label>
-        <input type="text" class="modalInput" id="roomCodeIpt">
-      </div>
-      <div class="modal-footer">
-        <button class="modalBtn confirmModal" id="confirmJoinModalBtn">OK</button>
-        <button class="modalBtn cancelModal" id="cancelModalBtn">Cancel</button>
-      </div>
-    </div>
-  </div>
-
+  <!-- Create Room Modal -->
   <div id="createRoomModal" class="modal">
     <div class="modal-content">
       <div class="modal-header">
-        <span style="background-color:#8F00FF" class="close cancelModal">&times;</span>
+        <span class="close cancelModal">&times;</span>
         <h2>Create Room</h2>
       </div>
       <div class="modal-body">
-        <label for="nicknameIpt">Nickname</label>
-        <input type="text" class="modalInput" id="createNicknameIpt">
+        <label for="createNicknameIpt">Nickname:</label>
+        <input type="text" id="createNicknameIpt" class="modalInput" placeholder="Enter your nickname" />
+        
+        <div class="character-carousel">
+          <button class="character-nav-btn prev-btn" data-modal="create">&lt;</button>
+          <div class="character-display">
+            <div class="character-option" id="create-character-1">
+              <img src="../img/characters/character1.png" alt="Character 1">
+            </div>
+            <div class="character-option" id="create-character-2">
+              <img src="../img/characters/character2.png" alt="Character 2">
+            </div>
+            <div class="character-option" id="create-character-3">
+              <img src="../img/characters/character3.png" alt="Character 3">
+            </div>
+            <div class="character-option" id="create-character-4">
+              <img src="../img/characters/character4.png" alt="Character 4">
+            </div>
+            <div class="character-option" id="create-character-5">
+              <img src="../img/characters/character5.png" alt="Character 5">
+            </div>
+            <div class="character-option" id="create-character-6">
+              <img src="../img/characters/character6.png" alt="Character 6">
+            </div>
+            <div class="character-option" id="create-character-7">
+              <img src="../img/characters/character7.png" alt="Character 7">
+            </div>
+          </div>
+          <button class="character-nav-btn next-btn" data-modal="create">&gt;</button>
+        </div>
+        <div class="character-indicator">
+          <span class="character-number">Character 1/7</span>
+        </div>
+        <input type="hidden" id="createSelectedCharacter" value="1">
       </div>
       <div class="modal-footer">
-        <button class="modalBtn confirmModal" id="confirmCreateModalBtn">OK</button>
-        <button class="modalBtn cancelModal" id="cancelModalBtn">Cancel</button>
+        <button class="modalBtn confirmModal" id="confirmCreateModalBtn">Create</button>
+        <button class="modalBtn cancelModal">Cancel</button>
       </div>
     </div>
   </div>
 
-  <div id="copyright">
-    <p> Copyright (c) 2021
-      <br> Draw.it , Various Authors
-      <br> This project is under the GNU GPL License
-      <br> Please, see this <a href="https://www.gnu.org/licenses/gpl-3.0.pt-br.html">link</a> for more details
-    </p>
+  <!-- Join Room Modal -->
+  <div id="joinRoomModal" class="modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <span class="close cancelModal">&times;</span>
+        <h2>Join Room</h2>
+      </div>
+      <div class="modal-body">
+        <label for="roomCodeIpt">Room Code:</label>
+        <input type="text" id="roomCodeIpt" class="modalInput" placeholder="Enter room code" />
+        <label for="joinNicknameIpt">Nickname:</label>
+        <input type="text" id="joinNicknameIpt" class="modalInput" placeholder="Enter your nickname" />
+        
+        <div class="character-carousel">
+          <button class="character-nav-btn prev-btn" data-modal="join">&lt;</button>
+          <div class="character-display">
+            <div class="character-option" id="join-character-1">
+              <img src="../img/characters/character1.png" alt="Character 1">
+            </div>
+            <div class="character-option" id="join-character-2">
+              <img src="../img/characters/character2.png" alt="Character 2">
+            </div>
+            <div class="character-option" id="join-character-3">
+              <img src="../img/characters/character3.png" alt="Character 3">
+            </div>
+            <div class="character-option" id="join-character-4">
+              <img src="../img/characters/character4.png" alt="Character 4">
+            </div>
+            <div class="character-option" id="join-character-5">
+              <img src="../img/characters/character5.png" alt="Character 5">
+            </div>
+            <div class="character-option" id="join-character-6">
+              <img src="../img/characters/character6.png" alt="Character 6">
+            </div>
+            <div class="character-option" id="join-character-7">
+              <img src="../img/characters/character7.png" alt="Character 7">
+            </div>
+          </div>
+          <button class="character-nav-btn next-btn" data-modal="join">&gt;</button>
+        </div>
+        <div class="character-indicator">
+          <span class="character-number">Character 1/7</span>
+        </div>
+        <input type="hidden" id="joinSelectedCharacter" value="1">
+      </div>
+      <div class="modal-footer">
+        <button class="modalBtn confirmModal" id="confirmJoinModalBtn">Join</button>
+        <button class="modalBtn cancelModal">Cancel</button>
+      </div>
+    </div>
   </div>
 
+  <script src="/scripts/socket.io.min.js"></script>
   <script src="../js/home.js"></script>
-
+  <script>
+    // Tutorial slideshow functionality
+    document.addEventListener('DOMContentLoaded', function() {
+      let currentSlide = 0;
+      const slides = document.querySelectorAll('.slide');
+      const dots = document.querySelectorAll('.dot');
+      const prevBtn = document.getElementById('prev-slide');
+      const nextBtn = document.getElementById('next-slide');
+      
+      function showSlide(n) {
+        // Hide all slides
+        slides.forEach(slide => {
+          slide.classList.remove('active');
+        });
+        
+        // Remove active class from all dots
+        dots.forEach(dot => {
+          dot.classList.remove('active');
+        });
+        
+        // Show the selected slide and activate corresponding dot
+        slides[n].classList.add('active');
+        dots[n].classList.add('active');
+        currentSlide = n;
+      }
+      
+      // Next/previous controls
+      function nextSlide() {
+        currentSlide = (currentSlide + 1) % slides.length;
+        showSlide(currentSlide);
+      }
+      
+      function prevSlide() {
+        currentSlide = (currentSlide - 1 + slides.length) % slides.length;
+        showSlide(currentSlide);
+      }
+      
+      // Event listeners
+      nextBtn.addEventListener('click', nextSlide);
+      prevBtn.addEventListener('click', prevSlide);
+      
+      // Dot navigation
+      dots.forEach(dot => {
+        dot.addEventListener('click', function() {
+          const slideIndex = parseInt(this.getAttribute('data-slide'));
+          showSlide(slideIndex);
+        });
+      });
+      
+      // Auto advance slides every 5 seconds
+      setInterval(nextSlide, 5000);
+    });
+  </script>
 </body>
 
 </html>

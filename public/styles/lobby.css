@@ -16,14 +16,14 @@
  *  along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
-html {
+ html {
   height: 100%;
   margin: 0;
   padding: 0;
 }
 
 body {
-  background-color: #01BEFE;
+  background-color: #01befe;
   height: auto;
   width: auto;
   min-height: 100vh;
@@ -49,7 +49,7 @@ body {
 .columnLeft {
   width: 25%;
   height: 100vh;
-  background-color: #01BEFE;
+  background-color: #01befe;
 }
 
 .columnRight {
@@ -58,8 +58,8 @@ body {
 }
 
 .header {
-  background-color: #01BEFE;
-  color: #8F00FF;
+  background-color: #01befe;
+  color: #8f00ff;
   text-align: center;
   margin: auto;
   font-size: xx-large;
@@ -82,11 +82,11 @@ body {
 }
 
 .ready {
-  background-color: #ADFF02;
+  background-color: #adff02;
 }
 
 .cancel {
-  background-color: #FF7D00;
+  background-color: #ff7d00;
 }
 
 canvas {
@@ -104,7 +104,7 @@ canvas {
 }
 
 #roomCodeHeader {
-  color: #8F00FF;
+  color: #8f00ff;
   display: flex;
 }
 
@@ -158,4 +158,54 @@ canvas {
 .controls .actions button {
   padding: 5px 10px;
   cursor: pointer;
+}
+
+/* Room code container styling */
+.room-code-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  margin: 0 auto;
+}
+
+.copy-btn {
+  background-color: #adff02;
+  border: 2px solid #000;
+  border-radius: 5px;
+  padding: 5px 10px;
+  font-size: 16px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 2px 2px 0px #000;
+}
+
+.copy-btn:hover {
+  background-color: #8f00ff;
+  color: white;
+}
+
+.copy-btn:active {
+  transform: translateY(2px);
+  box-shadow: none;
+}
+
+.copy-notification {
+  position: absolute;
+  top: 60px;
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: #adff02;
+  color: #000;
+  padding: 8px 15px;
+  border-radius: 5px;
+  border: 2px solid #000;
+  font-size: 16px;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  pointer-events: none;
+}
+
+.copy-notification.show {
+  opacity: 1;
 }

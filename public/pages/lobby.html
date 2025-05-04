@@ -1,21 +1,3 @@
-<!--
-Draw.it
-Copyright (C) 2021 Various Authors
-
-This program is free software: you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation, either version 3 of the License, or
-(at your option) any later version.
-
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License
-along with this program. If not, see <https://www.gnu.org/licenses/>.
--->
-
 <!DOCTYPE html>
 <html lang="en">
 
@@ -24,25 +6,42 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <link rel="stylesheet" href="../styles/lobby.css">
   <link rel="stylesheet" href="../styles/modal.css">
+  <link rel="stylesheet" href="../styles/sketchy-theme.css">
+  <link rel="icon" href="../img/game/icon.png" type="image/png">
   <title>Draw.it</title>
 </head>
 
 <body>
   <div class="row">
     <div class="column columnLeft">
-      <div class="header">
-        <h3 id="roomCodeHeader"></h3>
+      <div class="header sketchy-header">
+        <div class="room-code-container">
+          <h3 id="roomCodeHeader"></h3>
+          <button id="copyRoomCodeBtn" class="copy-btn" title="Copy Room Code">
+            Copy
+          </button>
+        </div>
+        <div id="copyNotification" class="copy-notification">
+          Room code copied!
+        </div>
       </div>
-      <div id="playerList">
-        <h3 id="playersHeader"></h3>
+      <div id="playerList" class="sketchy-container">
+        <h3 id="playersHeader">Players</h3>
         <div id="players">
+        </div>
+        <div class="game-mode-container">
+          <label for="gameModeSelector">Game Mode:</label>
+          <select id="gameModeSelector" class="game-mode-select">
+            <option value="guess">Guessing Mode</option>
+            <option value="copycat">Copycat Mode</option>
+          </select>
         </div>
         <button class="readyButton ready" id="lobbyReady">Ready</button>
       </div>
-    </div> <!--column columnLeft-->
+    </div>
 
     <div class="column columnRight">
-      <div class="header">
+      <div class="header sketchy-header">
         <h1 id="lobbyHeader">Waiting Room</h1>
       </div>
       <div class="canvasDiv" id="canvasDiv">
@@ -58,8 +57,8 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
         <canvas class="lobbyCanvas" id="lobbyCanvas" width="800" height="600">
         </canvas>
       </div>
-    </div> <!--column columnRight-->
-  </div> <!--row-->
+    </div>
+  </div>
 
   <script src="/scripts/socket.io.min.js"></script>
   <script src="../models/Player.js"></script>

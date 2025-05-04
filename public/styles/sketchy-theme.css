@@ -1,0 +1,276 @@
+/*
+ *  Draw.it
+ *  Copyright (C) 2021 Various Authors
+ *
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation, either version 3 of the License, or
+ *  (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program. If not, see <https://www.gnu.org/licenses/>.
+ */
+
+/* Sketchy Fun Theme */
+:root {
+    --primary-color: #ff6b6b;
+    --secondary-color: #4ecdc4;
+    --accent-color: #ffe66d;
+    --dark-color: #292f36;
+    --light-color: #f7fff7;
+    --sketchy-border: 3px solid var(--dark-color);
+    --sketchy-shadow: 4px 4px 0px var(--dark-color);
+    --sketchy-font: "Comic Sans MS", cursive, sans-serif;
+  }
+  
+  body {
+    background-color: var(--secondary-color);
+    font-family: var(--sketchy-font);
+    background-image: url("../img/sketchy-bg.png");
+    background-repeat: repeat;
+  }
+  
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    font-family: var(--sketchy-font);
+    color: var(--dark-color);
+    transform: rotate(-1deg);
+  }
+  
+  button {
+    font-family: var(--sketchy-font);
+    border: var(--sketchy-border);
+    box-shadow: var(--sketchy-shadow);
+    transform: rotate(1deg);
+    transition: all 0.2s ease;
+  }
+  
+  button:hover {
+    transform: rotate(-1deg) scale(1.05);
+  }
+  
+  button:active {
+    transform: rotate(0deg) scale(0.95);
+    box-shadow: 2px 2px 0px var(--dark-color);
+  }
+  
+  input {
+    font-family: var(--sketchy-font);
+    border: var(--sketchy-border);
+    background-color: var(--light-color);
+    padding: 8px;
+    border-radius: 5px;
+  }
+  
+  .sketchy-container {
+    background-color: var(--light-color);
+    border: var(--sketchy-border);
+    border-radius: 8px;
+    box-shadow: var(--sketchy-shadow);
+    padding: 15px;
+    margin: 10px;
+  }
+  
+  .sketchy-header {
+    background-color: var(--accent-color);
+    border-bottom: var(--sketchy-border);
+    padding: 10px;
+    margin-bottom: 15px;
+    transform: rotate(-1deg);
+  }
+  
+  /* Character carousel styling */
+  .character-carousel {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin: 15px 0;
+  }
+  
+  .character-display {
+    width: 120px;
+    height: 120px;
+    position: relative;
+  }
+  
+  .character-option {
+    width: 120px;
+    height: 120px;
+    border: 3px solid var(--dark-color);
+    border-radius: 50%;
+    overflow: hidden;
+    position: absolute;
+    top: 0;
+    left: 0;
+    transition: all 0.3s ease;
+  }
+  
+  .character-option.selected {
+    border: 3px solid var(--primary-color);
+    box-shadow: 0 0 10px var(--primary-color);
+  }
+  
+  .character-option img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+  
+  .character-nav-btn {
+    width: 40px;
+    height: 40px;
+    background-color: var(--accent-color);
+    color: var(--dark-color);
+    font-size: 20px;
+    font-weight: bold;
+    border-radius: 50%;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transform: rotate(0deg);
+  }
+  
+  .character-nav-btn:hover {
+    background-color: var(--primary-color);
+    color: var(--light-color);
+  }
+  
+  .character-indicator {
+    text-align: center;
+    margin-bottom: 15px;
+    font-weight: bold;
+  }
+  
+  .roomBtn {
+    background-color: var(--primary-color);
+    color: var(--light-color);
+    font-size: 28px;
+    padding: 15px 30px;
+    border-radius: 8px;
+  }
+  
+  .roomBtn:hover {
+    background-color: var(--accent-color);
+    color: var(--dark-color);
+  }
+  
+  .modal-content {
+    background-color: var(--light-color);
+    color: var(--dark-color);
+    border-radius: 10px;
+    border: var(--sketchy-border);
+    box-shadow: var(--sketchy-shadow);
+  }
+  
+  .modal-header {
+    background-color: var(--primary-color);
+    color: var(--light-color);
+    border-radius: 7px 7px 0 0;
+  }
+  
+  .confirmModal {
+    background-color: var(--secondary-color);
+    color: var(--light-color);
+  }
+  
+  .cancelModal {
+    background-color: var(--primary-color);
+    color: var(--light-color);
+  }
+  
+  /* Player avatars */
+  .player-avatar {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    margin-right: 10px;
+    display: inline-block;
+    vertical-align: middle;
+  }
+  
+  /* Canvas styling */
+  canvas {
+    border: var(--sketchy-border) !important;
+    border-radius: 10px !important;
+    background-color: var(--light-color) !important;
+    box-shadow: var(--sketchy-shadow) !important;
+  }
+  
+  .controls {
+    background-color: var(--accent-color) !important;
+    border: var(--sketchy-border);
+    border-radius: 10px 10px 0 0;
+  }
+  
+  /* Logo styling */
+  .logo-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 10px;
+  }
+  
+  .game-logo {
+    width: 60px;
+    height: 60px;
+    margin-right: 15px;
+    border: var(--sketchy-border);
+    border-radius: 50%;
+    box-shadow: var(--sketchy-shadow);
+    transform: rotate(5deg);
+  }
+  
+  /* Points animation */
+  @keyframes pointsGained {
+    0% {
+      transform: scale(1);
+      opacity: 1;
+    }
+    50% {
+      transform: scale(1.5);
+      opacity: 0.8;
+    }
+    100% {
+      transform: scale(1);
+      opacity: 1;
+    }
+  }
+  
+  .points-animation {
+    animation: pointsGained 0.8s ease-in-out;
+  }
+  
+  .points-indicator {
+    position: absolute;
+    color: #4caf50;
+    font-weight: bold;
+    font-size: 24px;
+    pointer-events: none;
+    opacity: 0;
+    animation: floatUp 1.5s ease-out forwards;
+  }
+  
+  @keyframes floatUp {
+    0% {
+      transform: translateY(0);
+      opacity: 1;
+    }
+    80% {
+      opacity: 0.8;
+    }
+    100% {
+      transform: translateY(-50px);
+      opacity: 0;
+    }
+  }
+  

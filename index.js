@@ -1,93 +1,153 @@
-/*
- *  Draw.it
- *  Copyright (C) 2021 Various Authors
- *
- *  This program is free software: you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation, either version 3 of the License, or
- *  (at your option) any later version.
- *
- *  This program is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
- *
- *  You should have received a copy of the GNU General Public License
- *  along with this program. If not, see <https://www.gnu.org/licenses/>.
- */
+const path = require("path")
+const express = require("express")
+const connectDB = require("./db")
 
-const path = require('path');
-const express = require('express');
+const app = express()
+const http = require("http").Server(app)
+const io = require("socket.io")(http)
 
-const app = express();
-const connectLivereload = require('connect-livereload');
-const http = require('http').Server(app);
-const io = require('socket.io')(http);
-const livereload = require('livereload').createServer();
+const LobbyController = require("./Modules/LobbyController")
 
-const LobbyController = require('./Modules/LobbyController');
+// Connect to MongoDB
+connectDB()
 
-const lobbyController = new LobbyController();
-const port = process.env.PORT || 3000;
-const publicDirectory = path.join(__dirname, 'public');
+const lobbyController = new LobbyController()
+const port = process.env.PORT || 3000
+const publicDirectory = path.join(__dirname, "public")
 
-/* ---------------------------------------------------------------------------*/
-/*                             Live Reload Server                             */
-/* ---------------------------------------------------------------------------*/
+// Static file serving
+app.use(express.static(publicDirectory))
 
-livereload.watch(publicDirectory);
-livereload.server.once('connection', () => { setTimeout(() => { livereload.refresh('/'); }, 100); });
+app.get("/", (req, res) => {
+  res.sendFile(path.join(publicDirectory, "pages/home.html"))
+})
 
-/* ---------------------------------------------------------------------------*/
-/*                                Express Setup                               */
-/* ---------------------------------------------------------------------------*/
+app.get("/lobby", (req, res) => {
+  res.sendFile(path.join(publicDirectory, "pages/lobby.html"))
+})
 
-app.use(connectLivereload());
-app.use(express.static(publicDirectory));
+app.get("/game", (req, res) => {
+  res.sendFile(path.join(publicDirectory, "pages/game.html"))
+})
 
-app.get('/', (req, res) => { res.sendFile(`${publicDirectory}/pages/home.html`); });
+app.use("/scripts", express.static(path.join(__dirname, "node_modules/socket.io/client-dist/")))
 
-app.get('/lobby', (req, res) => { res.sendFile(`${publicDirectory}/pages/lobby.html`); });
-
-app.get('/game', (req, res) => { res.sendFile(`${publicDirectory}/pages/game.html`); });
-
-// expose socket.io to client
-app.use('/scripts', express.static(`${__dirname}/node_modules/socket.io/client-dist/`));
-
-/* ---------------------------------------------------------------------------*/
-/*                                Socket Setup                                */
-/* ---------------------------------------------------------------------------*/
-
-/**
- * Sets up the socket listeners.
- */
 function onConnection(socket) {
-  socket.on('createRoom', (player) => { lobbyController.createRoom(socket, player); });
+  socket.on("createRoom", (player) => {
+    try {
+      lobbyController.createRoom(socket, player)
+    } catch (error) {
+      console.error("Error creating room:", error)
+      socket.emit("joinFailed", { error: "Failed to create room" })
+    }
+  })
 
-  socket.on('joinRoom', (player) => { lobbyController.joinRoom(io, socket, player); });
+  socket.on("joinRoom", (player) => {
+    try {
+      lobbyController.joinRoom(io, socket, player)
+    } catch (error) {
+      console.error("Error joining room:", error)
+      socket.emit("joinFailed", { error: "Failed to join room" })
+    }
+  })
 
-  socket.on('joinGame', (data) => { lobbyController.joinGame(io, socket, data.playerId, data.roomCode); });
+  socket.on("joinGame", (data) => {
+    try {
+      lobbyController.joinGame(io, socket, data.playerId, data.roomCode)
+    } catch (error) {
+      console.error("Error joining game:", error)
+      socket.emit("joinFailed", { error: "Failed to join game" })
+    }
+  })
 
-  socket.on('disconnecting', () => { setTimeout(() => lobbyController.removePlayerFromRooms(io, socket), 10000); });
+  socket.on("disconnecting", () => {
+    try {
+      setTimeout(() => lobbyController.removePlayerFromRooms(io, socket), 10000)
+    } catch (error) {
+      console.error("Error handling disconnect:", error)
+    }
+  })
 
-  socket.on('playerReadyChanged', (player) => { lobbyController.changePlayerReady(io, socket, player); });
+  socket.on("playerReadyChanged", (player) => {
+    try {
+      lobbyController.changePlayerReady(io, socket, player)
+    } catch (error) {
+      console.error("Error changing player ready status:", error)
+    }
+  })
 
-  socket.on('lobbyDrawing', (data, player) => { lobbyController.drawing(io, player, data); });
+  socket.on("lobbyDrawing", (data, player) => {
+    try {
+      lobbyController.drawing(io, player, data)
+    } catch (error) {
+      console.error("Error handling lobby drawing:", error)
+    }
+  })
 
-  socket.on('gameDrawing', (data, player) => { lobbyController.drawing(io, player, data); });
+  socket.on("gameDrawing", (data, player) => {
+    try {
+      lobbyController.drawing(io, player, data)
+    } catch (error) {
+      console.error("Error handling game drawing:", error)
+    }
+  })
 
-  socket.on('startNewRound', (roomCode) => { lobbyController.newRound(io, roomCode); });
+  socket.on("saveDrawing", (drawingData, player) => {
+    try {
+      lobbyController.saveDrawing(io, player, drawingData)
+    } catch (error) {
+      console.error("Error saving drawing:", error)
+    }
+  })
 
-  socket.on('guessWord', (player, word) => { lobbyController.guessWord(io, player, word); });
+  socket.on("startNewRound", (roomCode) => {
+    try {
+      lobbyController.newRound(io, roomCode)
+    } catch (error) {
+      console.error("Error starting new round:", error)
+    }
+  })
 
-  socket.on('endRound', (player) => { lobbyController.endRound(io, player); });
+  socket.on("guessWord", (player, word) => {
+    try {
+      lobbyController.guessWord(io, player, word)
+    } catch (error) {
+      console.error("Error handling word guess:", error)
+    }
+  })
 
-  socket.on('clearBoard', (player) => { lobbyController.clearBoard(io, player); });
+  socket.on("endRound", (player) => {
+    try {
+      lobbyController.endRound(io, player)
+    } catch (error) {
+      console.error("Error ending round:", error)
+    }
+  })
+
+  socket.on("clearBoard", (player) => {
+    try {
+      lobbyController.clearBoard(io, player)
+    } catch (error) {
+      console.error("Error clearing board:", error)
+    }
+  })
+
+  socket.on("updateTimeRemaining", (roomCode, timeRemaining) => {
+    try {
+      lobbyController.updateTimeRemaining(io, roomCode, timeRemaining)
+    } catch (error) {
+      console.error("Error updating time remaining:", error)
+    }
+  })
+
+  socket.on("changeGameMode", (roomCode, gameMode) => {
+    try {
+      lobbyController.changeGameMode(io, roomCode, gameMode)
+    } catch (error) {
+      console.error("Error changing game mode:", error)
+    }
+  })
 }
 
-/* ---------------------------------------------------------------------------*/
-/*                                    Init                                    */
-/* ---------------------------------------------------------------------------*/
-
-io.on('connection', onConnection);
-http.listen(port, () => console.log(`listening on port ${port}`));
+io.on("connection", onConnection)
+http.listen(port, () => console.log(`listening on port ${port}`))

@@ -1,21 +1,3 @@
-/*
- *  Draw.it
- *  Copyright (C) 2021 Various Authors
- *
- *  This program is free software: you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation, either version 3 of the License, or
- *  (at your option) any later version.
- *
- *  This program is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
- *
- *  You should have received a copy of the GNU General Public License
- *  along with this program. If not, see <https://www.gnu.org/licenses/>.
- */
-
 html {
   height: 100%;
   margin: 0;
@@ -76,7 +58,8 @@ canvas {
   justify-content: center;
 }
 
-.footer {}
+.footer {
+}
 
 #header {
   text-align: center;
@@ -171,11 +154,279 @@ canvas {
   margin-left: 10px;
 }
 
+[data-animate="clock"].animate {
+  animation-name: shake;
+  animation-duration: 0.5s;
+  animation-timing-function: ease;
+  animation-iteration-count: 10;
+}
 
-/* [data-animate="clock"] {
-  visibility: hidden;
-  transition: 0.5s;
-} */
+@keyframes shake {
+  0% {
+    transform: rotate3d(0, 0, 1, -20deg);
+  }
+  25% {
+    transform: rotate3d(0, 0, 1, 20deg);
+  }
+  50% {
+    transform: rotate3d(0, 0, 1, -20deg);
+  }
+  75% {
+    transform: rotate3d(0, 0, 1, 20deg);
+  }
+  100% {
+    transform: rotate3d(0, 0, 1, -20deg);
+  }
+}
+
+.controls {
+  height: auto;
+  display: none;
+  align-items: center;
+  background: #ddd;
+  padding: 10px;
+}
+
+.controls .color {
+  margin: 0px 10px;
+}
+
+.controls .actions {
+  flex: 1;
+  text-align: right;
+}
+
+.controls .actions button {
+  padding: 5px 10px;
+  cursor: pointer;
+}
+
+/* New drawing tools styles */
+.tools-container {
+  display: flex;
+  flex-wrap: wrap;
+  width: 100%;
+  gap: 10px;
+}
+
+.tool-group {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 5px;
+  border: 1px dashed #8f00ff;
+  border-radius: 5px;
+}
+
+.color-picker {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.color-palette {
+  display: flex;
+  gap: 3px;
+}
+
+.color-swatch {
+  width: 20px;
+  height: 20px;
+  border: 1px solid #000;
+  border-radius: 3px;
+  cursor: pointer;
+  transition: transform 0.1s;
+}
+
+/* Add styles for the copycat mode UI elements */
+.round-info,
+.copycat-info {
+  font-size: 16px;
+  margin: 5px 0;
+  padding: 5px;
+  background-color: #f0f0f0;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+}
+
+.copycat-info {
+  color: #8f00ff;
+  font-weight: bold;
+}
+
+/* Add styles for game mode display */
+.game-info {
+  margin-top: 20px;
+  text-align: center;
+}
+
+.game-mode-display {
+  font-size: 18px;
+  font-weight: bold;
+  color: #8f00ff;
+  padding: 5px 10px;
+  background-color: #f0f0f0;
+  border: 2px solid #000;
+  border-radius: 5px;
+  display: inline-block;
+  transform: rotate(-1deg);
+  box-shadow: 2px 2px 0px #000;
+}
+html {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  background-color: #01befe;
+  height: auto;
+  width: auto;
+  min-height: 100vh;
+  margin: 0;
+  padding: 0;
+}
+
+* {
+  font-family: cursive;
+  font-weight: bolder;
+  box-sizing: border-box;
+}
+
+canvas {
+  padding-left: 0;
+  padding-right: 0;
+  margin-left: auto;
+  margin-right: auto;
+  display: block;
+  touch-action: none;
+}
+
+.row {
+  height: 100%;
+  margin: 0;
+}
+
+.column {
+  float: left;
+}
+
+.columnLeft {
+  position: relative;
+  width: 30%;
+  height: 100vh;
+}
+
+.columnRight {
+  width: 70%;
+  height: 100vh;
+}
+
+.header {
+  color: #8f00ff;
+  text-align: center;
+  margin: auto;
+  width: 50%;
+  font-size: xx-large;
+  display: flex;
+  justify-content: center;
+}
+
+.footer {
+}
+
+#header {
+  text-align: center;
+  margin: auto;
+  width: 50%;
+  font-size: xx-large;
+}
+
+#playerList {
+  width: 80%;
+  margin: auto;
+  margin-left: 2vh;
+  font-size: x-large;
+}
+
+#playersHeader {
+  text-decoration: underline;
+}
+
+#players {
+  column-count: auto;
+  max-width: 100%;
+}
+
+#boxInputText {
+  display: flex;
+  width: 800px;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  background-color: #e4e4e4;
+  padding: 1rem;
+  border: 2px solid black;
+  margin-left: -1px;
+}
+
+#footer {
+  display: flex;
+  padding: 10px;
+  align-items: center;
+  justify-content: space-around;
+}
+
+#canvasDiv {
+  width: 800px;
+  background-color: white;
+  border: 1px solid black;
+  margin: auto;
+}
+
+#gameCanvas {
+  margin: 0 auto 0;
+}
+
+#wordIpt {
+  height: 30px;
+  width: 100%;
+  background-color: transparent;
+  border-color: transparent;
+  border-bottom: 2px solid black;
+}
+
+#sendBtn {
+  background-color: rgba(255, 255, 255, 1);
+  border-color: transparent;
+  border-radius: 5px;
+  padding: 5px 20px;
+  margin-left: 10px;
+}
+
+#sendBtn:active {
+  background-color: rgba(255, 255, 255, 0.5);
+  border-color: transparent;
+  border-radius: 5px;
+  padding: 5px 20px;
+  margin-left: 10px;
+}
+
+#sendBtn:hover {
+  transition: 2ms;
+  border-color: black;
+}
+
+#timer {
+  width: max-content;
+  font-weight: bolder;
+  margin-left: 30px;
+}
+
+#imgClock {
+  width: 40px;
+  margin-left: 10px;
+}
 
 [data-animate="clock"].animate {
   animation-name: shake;
@@ -203,11 +454,11 @@ canvas {
 }
 
 .controls {
-  height: 50px;
+  height: auto;
   display: none;
   align-items: center;
   background: #ddd;
-  padding: 0px 10px;
+  padding: 10px;
 }
 
 .controls .color {
@@ -222,4 +473,128 @@ canvas {
 .controls .actions button {
   padding: 5px 10px;
   cursor: pointer;
+}
+
+/* New drawing tools styles */
+.tools-container {
+  display: flex;
+  flex-wrap: wrap;
+  width: 100%;
+  gap: 10px;
+}
+
+.tool-group {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 5px;
+  border: 1px dashed #8f00ff;
+  border-radius: 5px;
+}
+
+.color-picker {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.color-palette {
+  display: flex;
+  gap: 3px;
+}
+
+.color-swatch {
+  width: 20px;
+  height: 20px;
+  border: 1px solid #000;
+  border-radius: 3px;
+  cursor: pointer;
+  transition: transform 0.1s;
+}
+
+/* Add styles for the copycat mode UI elements */
+.round-info,
+.copycat-info {
+  font-size: 16px;
+  margin: 5px 0;
+  padding: 5px;
+  background-color: #f0f0f0;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+}
+
+.copycat-info {
+  color: #8f00ff;
+  font-weight: bold;
+}
+
+/* Add styles for game mode display */
+.game-info {
+  margin-top: 20px;
+  text-align: center;
+}
+
+.game-mode-display {
+  font-size: 18px;
+  font-weight: bold;
+  color: #8f00ff;
+  padding: 5px 10px;
+  background-color: #f0f0f0;
+  border: 2px solid #000;
+  border-radius: 5px;
+  display: inline-block;
+  transform: rotate(-1deg);
+  box-shadow: 2px 2px 0px #000;
+}
+
+/* Reference drawing preview for copycat mode */
+.reference-drawing-container {
+  position: relative;
+  width: 100%;
+  max-width: 300px;
+  margin: 10px auto;
+  border: 3px solid #8f00ff;
+  border-radius: 5px;
+  overflow: hidden;
+}
+
+.reference-drawing-label {
+  background-color: #8f00ff;
+  color: white;
+  padding: 5px;
+  text-align: center;
+  font-weight: bold;
+}
+
+.reference-drawing {
+  width: 100%;
+  height: auto;
+}
+
+/* Viewing phase animation */
+@keyframes memorize-pulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(143, 0, 255, 0.7);
+  }
+  70% {
+    box-shadow: 0 0 0 10px rgba(143, 0, 255, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(143, 0, 255, 0);
+  }
+}
+
+.viewing-phase #gameCanvas {
+  animation: memorize-pulse 2s infinite;
+}
+
+.viewing-timer {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background-color: #8f00ff;
+  color: white;
+  font-size: 24px;
+  font-weight: bold;
+  padding: 5px 10px;
 }

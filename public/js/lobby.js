@@ -1,275 +1,264 @@
-/*
- *  Draw.it
- *  Copyright (C) 2021 Various Authors
- *
- *  This program is free software: you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation, either version 3 of the License, or
- *  (at your option) any later version.
- *
- *  This program is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
- *
- *  You should have received a copy of the GNU General Public License
- *  along with this program. If not, see <https://www.gnu.org/licenses/>.
- */
+// Add game mode selector for the host
+const roomCodeHeader = document.getElementById("roomCodeHeader")
+const playersHeader = document.getElementById("playersHeader")
+const playersList = document.getElementById("players")
+const lobbyHeader = document.getElementById("lobbyHeader")
+const lobbyCanvas = document.getElementById("lobbyCanvas")
+const readyButton = document.getElementById("lobbyReady")
+const resetCanvaBtn = document.querySelector("#reset-canvas")
+const copyRoomCodeBtn = document.getElementById("copyRoomCodeBtn")
+const copyNotification = document.getElementById("copyNotification")
+const gameModeSelector = document.getElementById("gameModeSelector")
 
-/* ---------------------------------------------------------------------------*/
-/*                                HTML Elements                               */
-/* ---------------------------------------------------------------------------*/
+let player
+let socket
+let currentRoom
 
-const roomCodeHeader = document.getElementById('roomCodeHeader');
-const playersHeader = document.getElementById('playersHeader');
-const playersList = document.getElementById('players');
-const lobbyHeader = document.getElementById('lobbyHeader');
-const lobbyCanvas = document.getElementById('lobbyCanvas');
-const readyButton = document.getElementById('lobbyReady');
-const resetCanvaBtn = document.querySelector('#reset-canvas');
+const queryString = window.location.search
+const urlParams = new URLSearchParams(queryString)
 
-/* ---------------------------------------------------------------------------*/
-/*                              Control Variables                             */
-/* ---------------------------------------------------------------------------*/
+const lobbyType = urlParams.get("type")
+const nickname = urlParams.get("nickname")
+const roomCode = urlParams.get("roomCode")
 
-/* global Player, io */
+let startGameTimer
 
-let player;
-let socket;
-let currentRoom;
+const initialCont = 5
+let startGameSeconds = initialCont
 
-/* url paramas */
+const context = lobbyCanvas.getContext("2d")
 
-const queryString = window.location.search;
-const urlParams = new URLSearchParams(queryString);
+let drawing = false
 
-const lobbyType = urlParams.get('type');
-const nickname = urlParams.get('nickname');
-const roomCode = urlParams.get('roomCode');
+const currentCanvasPosition = { color: "black", x: 0, y: 0 }
+const targetCanvasPosition = { color: "black", x: 0, y: 0 }
 
-/* timers */
-
-let startGameTimer;
-
-const initialCont = 5;
-let startGameSeconds = initialCont;
-
-/* canvas */
-
-const context = lobbyCanvas.getContext('2d');
-
-let drawing = false;
-
-const currentCanvasPosition = { color: 'black', x: 0, y: 0 };
-const targetCanvasPosition = { color: 'black', x: 0, y: 0 };
-
-/* ---------------------------------------------------------------------------*/
-/*                               Lobby Functions                              */
-/* ---------------------------------------------------------------------------*/
-
-/**
- * Starts a timer to redirect to the game page.
- *
- * @param {boolean} start whether to start the timer or cancel it.
- */
 function startGame(start) {
   if (start && !startGameTimer) {
     startGameTimer = setInterval(() => {
       if (startGameSeconds === 0) {
-        window.location.href = `/game?roomCode=${currentRoom.roomCode}&playerId=${socket.id}&playerNick=${nickname}`;
+        window.location.href = `/game?roomCode=${currentRoom.roomCode}&playerId=${socket.id}&playerNick=${nickname}`
       } else {
-        lobbyHeader.innerHTML = `Game starting in ${startGameSeconds}`;
-        startGameSeconds--;
+        lobbyHeader.innerHTML = `Game starting in ${startGameSeconds}`
+        startGameSeconds--
       }
-    }, 1000);
+    }, 1000)
   } else {
-    clearInterval(startGameTimer);
-    startGameTimer = undefined;
-    startGameSeconds = 5;
-    lobbyHeader.innerHTML = 'Waiting Room';
+    clearInterval(startGameTimer)
+    startGameTimer = undefined
+    startGameSeconds = 5
+    lobbyHeader.innerHTML = "Waiting Room"
   }
 }
 
-/**
- * Updates the player list with the current room's players metadata.
- */
 function updatePlayerList() {
-  if (!currentRoom.gameStarted) {
-    playersList.innerHTML = '';
-    playersHeader.innerHTML = `Players - ${currentRoom.players.length}/${currentRoom.maxPlayers}`;
+  if (!currentRoom || !currentRoom.gameStarted) {
+    playersList.innerHTML = ""
+    if (currentRoom && currentRoom.players) {
+      playersHeader.innerHTML = `Players - ${currentRoom.players.length}/${currentRoom.maxPlayers}`
 
-    for (let i = 0; i < currentRoom.maxPlayers; i++) {
-      const p = document.createElement('p');
+      for (let i = 0; i < currentRoom.maxPlayers; i++) {
+        const p = document.createElement("p")
 
-      if (currentRoom.players[i]) {
-        p.className = 'player joined';
-        p.innerHTML = currentRoom.players[i].nickname;
-        if (currentRoom.players[i].ready) {
-          p.innerHTML += ' 👍';
+        if (currentRoom.players[i]) {
+          p.className = "player joined"
+          const characterImg = document.createElement("img")
+          characterImg.src = `../img/characters/character${currentRoom.players[i].character}.png`
+          characterImg.className = "player-avatar"
+          characterImg.alt = "Player avatar"
+
+          p.appendChild(characterImg)
+          p.appendChild(document.createTextNode(currentRoom.players[i].nickname))
+
+          if (currentRoom.players[i].ready) {
+            p.innerHTML += " 👍"
+          }
+        } else {
+          p.className = "player empty"
+          p.innerHTML = "Empty"
         }
-      } else {
-        p.className = 'player empty';
-        p.innerHTML = 'Empty';
+
+        playersList.appendChild(p)
       }
 
-      playersList.appendChild(p);
-    }
+      // Show game mode selector only for the host (first player)
+      if (currentRoom.players.length > 0 && currentRoom.players[0].nickname === nickname) {
+        gameModeSelector.style.display = "block"
+        gameModeSelector.value = currentRoom.gameMode || "guess"
+      } else {
+        gameModeSelector.style.display = "none"
+      }
 
-    if (currentRoom.everyoneReady) {
-      startGame(true);
-    } else {
-      startGame(false);
+      if (currentRoom.everyoneReady) {
+        startGame(true)
+      } else {
+        startGame(false)
+      }
     }
   }
 }
 
-/* ---------------------------------------------------------------------------*/
-/*                              Canvas Functions                              */
-/* ---------------------------------------------------------------------------*/
+function copyRoomCode() {
+  if (currentRoom && currentRoom.roomCode) {
+    navigator.clipboard
+      .writeText(currentRoom.roomCode)
+      .then(() => {
+        copyNotification.classList.add("show")
 
-/**
- * Simple throttle function.
- *
- * @param {callback} callback the function to throttle
- * @param {number} delay the delay in milliseconds
- * @returns the throttled function
- */
-function throttle(callback, delay) {
-  let previousCall = new Date().getTime();
-  return (...args) => {
-    const time = new Date().getTime();
-    if (time - previousCall >= delay) {
-      previousCall = time;
-      callback.apply(null, args);
-    }
-  };
+        setTimeout(() => {
+          copyNotification.classList.remove("show")
+        }, 2000)
+      })
+      .catch((err) => {
+        console.error("Failed to copy room code: ", err)
+      })
+  }
 }
 
-/**
- * Updates the given canvas position object with the mouse or touch coordinates
- * relative to the canvas.
- *
- * @param {Object} event the mouse or touch event
- * @param {Object} position the position object to update
- */
+function changeGameMode(event) {
+  if (currentRoom && currentRoom.players.length > 0 && currentRoom.players[0].nickname === nickname) {
+    const newMode = event.target.value
+    socket.emit("changeGameMode", currentRoom.roomCode, newMode)
+  }
+}
+
+function throttle(callback, delay) {
+  let previousCall = new Date().getTime()
+  return (...args) => {
+    const time = new Date().getTime()
+    if (time - previousCall >= delay) {
+      previousCall = time
+      callback.apply(null, args)
+    }
+  }
+}
+
 function relMouseCoords(event, position) {
-  let totalOffsetX = 0;
-  let totalOffsetY = 0;
-  let currentElement = event.target;
+  let totalOffsetX = 0
+  let totalOffsetY = 0
+  let currentElement = event.target
 
   do {
-    totalOffsetX += currentElement.offsetLeft - currentElement.scrollLeft;
-    totalOffsetY += currentElement.offsetTop - currentElement.scrollTop;
-    currentElement = currentElement.offsetParent;
-  } while (currentElement);
+    totalOffsetX += currentElement.offsetLeft - currentElement.scrollLeft
+    totalOffsetY += currentElement.offsetTop - currentElement.scrollTop
+    currentElement = currentElement.offsetParent
+  } while (currentElement)
 
-  position.x = (event.pageX || event.touches[0].pageX) - totalOffsetX;
-  position.y = (event.pageY || event.touches[0].pageY) - totalOffsetY;
+  position.x = (event.pageX || (event.touches && event.touches[0] ? event.touches[0].pageX : 0)) - totalOffsetX
+  position.y = (event.pageY || (event.touches && event.touches[0] ? event.touches[0].pageY : 0)) - totalOffsetY
 }
 
-/**
- * Draws a line between the current position and the target position.
- *
- * @param {number} x0 the current x position
- * @param {number} y0 the current y position
- * @param {number} x1 the target x position
- * @param {number} y1 the target y position
- * @param {string} color the color of the line
- * @param {boolean} emit whether to emit the line to the server
- */
 function drawLine(x0, y0, x1, y1, color, emit) {
   if (!emit) {
-    const rect = lobbyCanvas.getBoundingClientRect();
-    const widthMultiplier = lobbyCanvas.width / rect.width;
+    const rect = lobbyCanvas.getBoundingClientRect()
+    const widthMultiplier = lobbyCanvas.width / rect.width
 
-    context.beginPath();
-    context.moveTo(x0 * widthMultiplier, y0 * widthMultiplier);
-    context.lineTo(x1 * widthMultiplier, y1 * widthMultiplier);
-    context.strokeStyle = color;
-    context.lineWidth = 2;
-    context.stroke();
-    context.closePath();
+    context.beginPath()
+    context.moveTo(x0 * widthMultiplier, y0 * widthMultiplier)
+    context.lineTo(x1 * widthMultiplier, y1 * widthMultiplier)
+    context.strokeStyle = color
+    context.lineWidth = 2
+    context.stroke()
+    context.closePath()
 
-    return;
+    return
   }
 
   socket.emit(
-    'lobbyDrawing', {
-      x0, y0, x1, y1, color,
-    }, player,
-  );
+    "lobbyDrawing",
+    {
+      x0,
+      y0,
+      x1,
+      y1,
+      color,
+    },
+    player,
+  )
 }
 
-/**
- * Clears the canvas content.
- */
 function onResetBtnClick() {
-  context.clearRect(0, 0, lobbyCanvas.width, lobbyCanvas.height);
+  context.clearRect(0, 0, lobbyCanvas.width, lobbyCanvas.height)
 }
 
-/**
- * Updates the canvas input data object with client's selected color.
- *
- * @param {*} event the color input event.
- */
 function changeColor(event) {
-  currentCanvasPosition.color = event.target.value;
+  currentCanvasPosition.color = event.target.value
 }
 
-/**
- * Setups the color change event listener and selects the new color.
- */
 function selectColor() {
-  const penColor = document.querySelector('#pen-color');
-  penColor.value = currentCanvasPosition.color;
-  penColor.addEventListener('input', changeColor, false);
-  penColor.select();
+  const penColor = document.querySelector("#pen-color")
+  penColor.value = currentCanvasPosition.color
+  penColor.addEventListener("input", changeColor, false)
+  penColor.select()
 }
 
-/* ---------------------------------------------------------------------------*/
-/*                                 HTML Events                                */
-/* ---------------------------------------------------------------------------*/
-
-/**
- * Updates the current player's status and toggles the ready button.
- */
 function onReadyClick() {
-  if (readyButton.className === 'readyButton ready') {
-    readyButton.className = 'readyButton cancel';
-    readyButton.innerHTML = 'Cancel';
-    player.ready = true;
-    socket.emit('playerReadyChanged', player);
+  console.log("[onReadyClick] Current player:", player)
+
+  if (!player || !player.roomCode) {
+    console.error("[onReadyClick] Player or roomCode is missing:", player)
+    showErrorMessage("Player data is incomplete. Please refresh the page.")
+    return
+  }
+
+  if (readyButton.className === "readyButton ready") {
+    readyButton.className = "readyButton cancel"
+    readyButton.innerHTML = "Cancel"
+    player.ready = true
+
+    // Log the player data being sent
+    console.log("[onReadyClick] Setting player ready:", player)
+
+    // Make sure we're sending the complete player object
+    socket.emit("playerReadyChanged", {
+      nickname: player.nickname,
+      roomCode: player.roomCode,
+      character: player.character,
+      ready: true,
+      socketId: socket.id,
+    })
   } else {
-    readyButton.className = 'readyButton ready';
-    readyButton.innerHTML = 'Ready';
-    player.ready = false;
-    socket.emit('playerReadyChanged', player);
+    readyButton.className = "readyButton ready"
+    readyButton.innerHTML = "Ready"
+    player.ready = false
+
+    // Log the player data being sent
+    console.log("[onReadyClick] Setting player not ready:", player)
+
+    // Make sure we're sending the complete player object
+    socket.emit("playerReadyChanged", {
+      nickname: player.nickname,
+      roomCode: player.roomCode,
+      character: player.character,
+      ready: false,
+      socketId: socket.id,
+    })
   }
 }
 
-/**
- * Updates the current mouse or touch position on the canvas.
- *
- * @param {Object} event the mouse down or touch start event
- */
-function onMouseDown(event) {
-  drawing = true;
-  selectColor();
-  relMouseCoords(event, currentCanvasPosition);
+function showErrorMessage(message) {
+  const errorNotification = document.createElement("div")
+  errorNotification.className = "error-notification"
+  errorNotification.textContent = message
+  document.body.appendChild(errorNotification)
+
+  setTimeout(() => {
+    document.body.removeChild(errorNotification)
+  }, 3000)
 }
 
-/**
- * Updates the target mouse or touch position on the canvas, and draws a line
- * between the current position and the target position.
- *
- * @param {Object} event the mouse up or touch end event
- */
+function onMouseDown(event) {
+  drawing = true
+  selectColor()
+  relMouseCoords(event, currentCanvasPosition)
+}
+
 function onMouseUp(event) {
   if (!drawing) {
-    return;
+    return
   }
-  drawing = false;
-  relMouseCoords(event, targetCanvasPosition);
+  drawing = false
+  relMouseCoords(event, targetCanvasPosition)
   drawLine(
     currentCanvasPosition.x,
     currentCanvasPosition.y,
@@ -277,21 +266,14 @@ function onMouseUp(event) {
     targetCanvasPosition.y,
     currentCanvasPosition.color,
     true,
-  );
+  )
 }
 
-/**
- * Updates the target mouse or touch position on the canvas, draws a line
- * between the current position and the target position, and updates the current
- * position.
- *
- * @param {Object} event the mouse move or touch move event
- */
 function onMouseMove(event) {
   if (!drawing) {
-    return;
+    return
   }
-  relMouseCoords(event, targetCanvasPosition);
+  relMouseCoords(event, targetCanvasPosition)
   drawLine(
     currentCanvasPosition.x,
     currentCanvasPosition.y,
@@ -299,137 +281,175 @@ function onMouseMove(event) {
     targetCanvasPosition.y,
     currentCanvasPosition.color,
     true,
-  );
-  relMouseCoords(event, currentCanvasPosition);
+  )
+  relMouseCoords(event, currentCanvasPosition)
 }
 
-/* ---------------------------------------------------------------------------*/
-/*                                Socket Events                               */
-/* ---------------------------------------------------------------------------*/
-
-/**
- * Updates the room data and the new connected player's game page.
- *
- * @param {Object} updatedRoom the updated room
- */
 function onJoinComplete(updatedRoom) {
-  currentRoom = updatedRoom;
-  roomCodeHeader.innerHTML = `Room ${currentRoom.roomCode}`;
-  updatePlayerList();
+  console.log("[onJoinComplete] Room data:", updatedRoom)
+  currentRoom = updatedRoom
+  roomCodeHeader.innerHTML = `Room ${currentRoom.roomCode}`
+  updatePlayerList()
 }
 
-/**
- * Shows a nickanme already in use join failure message and redirects to the
- * home page.
- */
+function onGameModeChanged(updatedRoom) {
+  console.log("[onGameModeChanged] Room data:", updatedRoom)
+  currentRoom = updatedRoom
+  gameModeSelector.value = currentRoom.gameMode
+
+  // Show a notification about the game mode change
+  const modeNotification = document.createElement("div")
+  modeNotification.className = "mode-notification"
+  modeNotification.textContent = `Game mode changed to: ${currentRoom.gameMode === "guess" ? "Guessing" : "Copycat"}`
+  document.body.appendChild(modeNotification)
+
+  setTimeout(() => {
+    document.body.removeChild(modeNotification)
+  }, 3000)
+}
+
+function onReadyError(error) {
+  console.error("[onReadyError]", error)
+  showErrorMessage(error.message || "Error changing ready status")
+
+  // Reset the ready button to match the player's status in the room
+  if (currentRoom && currentRoom.players) {
+    for (let i = 0; i < currentRoom.players.length; i++) {
+      if (currentRoom.players[i].nickname === nickname) {
+        if (currentRoom.players[i].ready) {
+          readyButton.className = "readyButton cancel"
+          readyButton.innerHTML = "Cancel"
+        } else {
+          readyButton.className = "readyButton ready"
+          readyButton.innerHTML = "Ready"
+        }
+        break
+      }
+    }
+  }
+}
+
 function onNickInUse() {
-  lobbyHeader.innerHTML = 'Nickname is already in use';
+  lobbyHeader.innerHTML = "Nickname is already in use"
   setTimeout(() => {
-    window.location.href = '/';
-  }, 2000);
+    window.location.href = "/"
+  }, 2000)
 }
 
-/**
- * Shows a join failure message and redirects to the home page.
- */
 function onJoinFailed() {
-  lobbyHeader.innerHTML = 'Room not found!';
+  lobbyHeader.innerHTML = "Room not found!"
   setTimeout(() => {
-    window.location.href = '/';
-  }, 2000);
+    window.location.href = "/"
+  }, 2000)
 }
 
-/**
- * Shows a join failure due to full room message and redirects to the home page.
- */
 function onJoinFailedMaxPlayers() {
-  lobbyHeader.innerHTML = 'Room is full!';
+  lobbyHeader.innerHTML = "Room is full!"
   setTimeout(() => {
-    window.location.href = '/';
-  }, 2000);
+    window.location.href = "/"
+  }, 2000)
 }
 
-/**
- * Updates the room data and the players list.
- *
- * @param {Object} updatedRoom the updated room
- */
 function onPlayersChanged(updatedRoom) {
-  currentRoom = updatedRoom;
-  updatePlayerList();
+  console.log("[onPlayersChanged] Room data:", updatedRoom)
+  currentRoom = updatedRoom
+  updatePlayerList()
+
+  // Update the ready button state to match the player's ready status in the room
+  if (currentRoom && currentRoom.players) {
+    for (let i = 0; i < currentRoom.players.length; i++) {
+      if (currentRoom.players[i].nickname === nickname) {
+        console.log(`[onPlayersChanged] Player ${nickname} ready status: ${currentRoom.players[i].ready}`)
+        // Update the ready button to match the player's ready status
+        if (currentRoom.players[i].ready) {
+          readyButton.className = "readyButton cancel"
+          readyButton.innerHTML = "Cancel"
+        } else {
+          readyButton.className = "readyButton ready"
+          readyButton.innerHTML = "Ready"
+        }
+        break
+      }
+    }
+  }
 }
 
-/**
- * Draws a line with the data incoming from the server.
- *
- * @param {Object} data the drawing input
- */
 function onDrawingEvent(data) {
-  drawLine(data.x0, data.y0, data.x1, data.y1, data.color, false);
+  drawLine(data.x0, data.y0, data.x1, data.y1, data.color, false)
 }
 
-/* ---------------------------------------------------------------------------*/
-/*                                    Init                                    */
-/* ---------------------------------------------------------------------------*/
-
-/**
- * Sets up the socket listeners.
- */
 function setupSocket() {
-  socket = io.connect('/');
+  // Make sure io is defined
+  if (typeof io !== "undefined") {
+    socket = io()
 
-  socket.on('joinComplete', onJoinComplete);
-  socket.on('joinFailed', onJoinFailed);
-  socket.on('joinFailedMaxPlayers', onJoinFailedMaxPlayers);
-  socket.on('nickInUse', onNickInUse);
+    socket.on("joinComplete", onJoinComplete)
+    socket.on("joinFailed", onJoinFailed)
+    socket.on("joinFailedMaxPlayers", onJoinFailedMaxPlayers)
+    socket.on("nickInUse", onNickInUse)
+    socket.on("gameModeChanged", onGameModeChanged)
+    socket.on("readyError", onReadyError)
 
-  socket.on('playersChanged', onPlayersChanged);
-  socket.on('playerDrawing', onDrawingEvent);
+    socket.on("playersChanged", onPlayersChanged)
+    socket.on("playerDrawing", onDrawingEvent)
+  } else {
+    console.error("Socket.io is not loaded!")
+    lobbyHeader.innerHTML = "Error: Socket.io not loaded!"
+  }
 }
 
-/**
- * Checks the URL for the lobby type, nickname and room code.
- */
 function checkParameters() {
   if (!lobbyType || !nickname || !roomCode) {
-    window.location.href = '/';
+    window.location.href = "/"
   }
 }
 
-/**
- * Sets up the client with the URL parameters.
- */
 function initializeClient() {
-  player = new Player(nickname, roomCode);
+  // Make sure socket is initialized before using it
+  if (!socket) {
+    console.error("Socket not initialized!")
+    return
+  }
 
-  if (lobbyType === 'create') {
-    socket.emit('createRoom', player);
+  const characterId = urlParams.get("character") || "1"
+  player = {
+    nickname: nickname,
+    roomCode: roomCode,
+    character: characterId,
+    ready: false,
+    socketId: socket.id, // Add socketId to player object
+  }
+
+  console.log("[initializeClient] Initializing client with player:", player)
+
+  if (lobbyType === "create") {
+    socket.emit("createRoom", player)
   } else {
-    socket.emit('joinRoom', player);
+    socket.emit("joinRoom", player)
   }
 }
 
-setupSocket();
-checkParameters();
-initializeClient();
+// First setup the socket
+setupSocket()
+// Then check parameters
+checkParameters()
+// Then initialize the client
+if (socket) {
+  initializeClient()
+}
 
-/* ---------------------------------------------------------------------------*/
-/*                              HTML Events Setup                             */
-/* ---------------------------------------------------------------------------*/
+// Add event listeners
+readyButton.onclick = onReadyClick
+resetCanvaBtn.onclick = onResetBtnClick
+copyRoomCodeBtn.onclick = copyRoomCode
+gameModeSelector.onchange = changeGameMode
 
-readyButton.onclick = onReadyClick;
-resetCanvaBtn.onclick = onResetBtnClick;
+lobbyCanvas.addEventListener("mousedown", onMouseDown, false)
+lobbyCanvas.addEventListener("mouseup", onMouseUp, false)
+lobbyCanvas.addEventListener("mouseout", onMouseUp, false)
+lobbyCanvas.addEventListener("mousemove", throttle(onMouseMove, 10), false)
 
-/* Canvas */
-
-// mouse events
-lobbyCanvas.addEventListener('mousedown', onMouseDown, false);
-lobbyCanvas.addEventListener('mouseup', onMouseUp, false);
-lobbyCanvas.addEventListener('mouseout', onMouseUp, false);
-lobbyCanvas.addEventListener('mousemove', throttle(onMouseMove, 10), false);
-
-// touch events
-lobbyCanvas.addEventListener('touchstart', onMouseDown, false);
-lobbyCanvas.addEventListener('touchend', onMouseUp, false);
-lobbyCanvas.addEventListener('touchcancel', onMouseUp, false);
-lobbyCanvas.addEventListener('touchmove', throttle(onMouseMove, 10), false);
+lobbyCanvas.addEventListener("touchstart", onMouseDown, false)
+lobbyCanvas.addEventListener("touchend", onMouseUp, false)
+lobbyCanvas.addEventListener("touchcancel", onMouseUp, false)
+lobbyCanvas.addEventListener("touchmove", throttle(onMouseMove, 10), false)

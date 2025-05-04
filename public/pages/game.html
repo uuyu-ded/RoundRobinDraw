@@ -1,21 +1,3 @@
-<!--
-Draw.it
-Copyright (C) 2021 Various Authors
-
-This program is free software: you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation, either version 3 of the License, or
-(at your option) any later version.
-
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License
-along with this program. If not, see <https://www.gnu.org/licenses/>.
--->
-
 <!DOCTYPE html>
 <html lang="en">
 
@@ -23,6 +5,8 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <link rel="stylesheet" href="../styles/game.css" />
+  <link rel="stylesheet" href="../styles/sketchy-theme.css" />
+  <link rel="icon" href="../img/game/icon.png" type="image/png">
   <title>Draw.it</title>
 </head>
 
@@ -30,27 +14,73 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
   <div class="row">
 
     <div class="column columnLeft">
-      <div class="header">
+      <div class="header sketchy-header">
         <h3 id="roomCodeHeader"></h3>
       </div>
-      <div id="playerList">
+      <div id="playerList" class="sketchy-container">
         <h3 id="playersHeader">Players</h3>
         <div id="players"></div>
+        <div class="game-info">
+          <p id="gameMode" class="game-mode-display"></p>
+          <p id="roundInfo" class="round-info"></p>
+          <p id="copycatInfo" class="copycat-info"></p>
+        </div>
       </div>
-    </div> <!--column columnLeft-->
+    </div>
+
+    <div class="game-info">
+      <p id="gameMode" class="game-mode-display"></p>
+      <p id="roundInfo" class="round-info"></p>
+      <p id="copycatInfo" class="copycat-info"></p>
+      <div id="referenceContainer" class="reference-drawing-container" style="display: none;">
+        <div class="reference-drawing-label">Memorize This Drawing</div>
+        <canvas id="referenceCanvas" class="reference-drawing" width="300" height="225"></canvas>
+      </div>
+    </div>
 
     <div class="column columnRight">
-      <div class="header">
+      <div class="header sketchy-header">
         <h1 id="gameHeader">Player is drawing</h1>
       </div>
       <div id="canvasDiv">
         <div class="controls" id="controls">
-          <div class="color">
-            <label for="pen-color">Color</label>
-            <input type="color" id="pen-color" value="#000">
-          </div>
-          <div class="actions">
-            <button id="reset-canvas">Reset</button>
+          <div class="tools-container">
+            <div class="tool-group">
+              <div class="color-picker">
+                <label for="pen-color">Color</label>
+                <input type="color" id="pen-color" value="#000000">
+              </div>
+              
+              <div class="color-palette">
+                <div class="color-swatch" data-color="#000000" style="background-color: #000000;"></div>
+                <div class="color-swatch" data-color="#ff0000" style="background-color: #ff0000;"></div>
+                <div class="color-swatch" data-color="#00ff00" style="background-color: #00ff00;"></div>
+                <div class="color-swatch" data-color="#0000ff" style="background-color: #0000ff;"></div>
+                <div class="color-swatch" data-color="#ffff00" style="background-color: #ffff00;"></div>
+                <div class="color-swatch" data-color="#ff00ff" style="background-color: #ff00ff;"></div>
+                <div class="color-swatch" data-color="#00ffff" style="background-color: #00ffff;"></div>
+                <div class="color-swatch" data-color="#ffffff" style="background-color: #ffffff;"></div>
+              </div>
+            </div>
+            
+            <div class="tool-group">
+              <button id="pencil-tool" class="tool-btn active" title="Pencil">✏️</button>
+              <button id="eraser-tool" class="tool-btn" title="Eraser">🧽</button>
+              <button id="bucket-tool" class="tool-btn" title="Fill">🪣</button>
+              <button id="dropper-tool" class="tool-btn" title="Color Picker">👁️</button>
+            </div>
+            
+            <div class="tool-group">
+              <button id="undo-btn" class="tool-btn" title="Undo">↩️</button>
+              <button id="redo-btn" class="tool-btn" title="Redo">↪️</button>
+              <button id="reset-canvas" class="tool-btn" title="Clear Canvas">🗑️</button>
+            </div>
+            
+            <div class="tool-group">
+              <label for="brush-size">Size:</label>
+              <input type="range" id="brush-size" min="1" max="50" value="2">
+              <span id="size-display">2px</span>
+            </div>
           </div>
         </div>
         <canvas class="gameCanvas" id="gameCanvas" width="800" height="600"></canvas>
@@ -59,7 +89,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
             <div id="boxChat"></div>
             <div style="width: 50%;float:left">
               <p style="display: none;" id="rightWord"></p>
-              <input type="text" onkeyup="changeColorInput()" name="word" id="wordIpt" placeholder="Guess!" />
+              <input type="text" name="word" id="wordIpt" placeholder="Guess!" />
             </div>
             <div style="width: 20%;float:left">
               <button id="sendBtn">Send</button>
@@ -69,14 +99,14 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
             <span id="timer">2:00</span>
           </div>
           <div style="width: 10%;">
-            <img src="../img/game/clock.svg" id="img-clock" data-animate="clock" style="width:40px">
+            <img src="../img/game/clock.png" id="img-clock" data-animate="clock" style="width:40px">
           </div>
         </div>
       </div>
       <div class="footer"></div>
-    </div> <!--column columnRight-->
+    </div>
 
-  </div><!--row-->
+  </div>
 
   <script src="/scripts/socket.io.min.js"></script>
   <script src="../models/Player.js"></script>

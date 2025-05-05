@@ -109,17 +109,6 @@
                 </div>
               </div>
             </div>
-            <!-- Add comments section -->
-            <div class="comments-section">
-              <h3>Comments</h3>
-              <div id="commentsList" class="comments-list">
-                <!-- Comments will be added here dynamically -->
-              </div>
-              <div class="comment-form">
-                <textarea id="commentInput" placeholder="Add a comment..." rows="2"></textarea>
-                <button id="submitComment" class="comment-btn">Post</button>
-              </div>
-            </div>
           </div>
           <div class="album-actions">
             <button id="continueFromAlbum" class="continue-btn">Continue to Next Round</button>
@@ -136,15 +125,11 @@
               <button id="sendBtn">Send</button>
             </div>
           </div>
-          <div class="timer-wrapper">
+          <div style="width: 10%;">
             <span id="timer">2:00</span>
-            <div class="clock-container">
-              <div class="clock-face">
-                <div class="clock-center"></div>
-                <div class="clock-hand hour-hand"></div>
-                <div class="clock-hand minute-hand"></div>
-              </div>
-            </div>
+          </div>
+          <div style="width: 10%;">
+            <img src="../img/game/clock.png" id="img-clock" data-animate="clock" style="width:40px">
           </div>
         </div>
       </div>

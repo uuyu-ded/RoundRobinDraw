@@ -132,6 +132,41 @@ function showServerLog(message) {
   }, 3000)
 }
 
+// Add this function near the beginning of the file:
+
+function debugTools() {
+  console.log("Debugging drawing tools...")
+
+  // Check if we're on the game page
+  console.log("Is game page:", isGamePage)
+
+  // Check if canvas exists
+  console.log("Game canvas:", gameCanvas)
+
+  // Check if controls exist
+  const controls = document.getElementById("controls")
+  console.log("Controls element:", controls)
+
+  // Check tool buttons
+  const toolButtons = {
+    pencil: document.getElementById("pencil-tool"),
+    eraser: document.getElementById("eraser-tool"),
+    bucket: document.getElementById("bucket-tool"),
+    dropper: document.getElementById("dropper-tool"),
+    undo: document.getElementById("undo-btn"),
+    redo: document.getElementById("redo-btn"),
+    reset: document.getElementById("reset-canvas"),
+  }
+  console.log("Tool buttons:", toolButtons)
+
+  // Check if we're the drawer
+  console.log("Is drawer:", isDrawer)
+  console.log("Can draw:", canDraw)
+
+  // Check current tool
+  console.log("Current tool:", currentTool)
+}
+
 // Check if we're on the game page
 const isGamePage = window.location.pathname.includes("/game") && gameCanvas !== null
 
@@ -216,7 +251,12 @@ if (isGamePage) {
 
   function showToolBar() {
     const control = document.getElementById("controls")
-    control.style.display = "flex"
+    if (control) {
+      console.log("Showing toolbar")
+      control.style.display = "flex"
+    } else {
+      console.warn("Controls element not found")
+    }
   }
 
   function getDrawer() {
@@ -333,16 +373,21 @@ if (isGamePage) {
     }, 1000)
   }
 
-  function throttle(callback, delay) {
+  // Add this function near the beginning of the file, after the variable declarations
+  // Declare throttle outside the scope of the function where it's used
+  let throttle
+  ;(() => {
     let previousCall = new Date().getTime()
-    return (...args) => {
-      const time = new Date().getTime()
-      if (time - previousCall >= delay) {
-        previousCall = time
-        callback.apply(null, args)
+    throttle =
+      (callback, delay) =>
+      (...args) => {
+        const time = new Date().getTime()
+        if (time - previousCall >= delay) {
+          previousCall = time
+          callback.apply(null, args)
+        }
       }
-    }
-  }
+  })()
 
   function relMouseCoords(e, position) {
     let totalOffsetX = 0
@@ -681,6 +726,7 @@ function onMouseMove(e) {
 }
 
 function setActiveTool(tool) {
+  console.log("Setting active tool:", tool)
   currentTool = tool
 
   // Update UI
@@ -689,17 +735,24 @@ function setActiveTool(tool) {
     btn.classList.remove("active")
   })
 
-  document.getElementById(`${tool}-tool`).classList.add("active")
+  const activeToolBtn = document.getElementById(`${tool}-tool`)
+  if (activeToolBtn) {
+    activeToolBtn.classList.add("active")
+  } else {
+    console.warn(`Tool button not found: ${tool}-tool`)
+  }
 
   // Handle special tool behaviors
-  if (tool === "eraser") {
-    gameCanvas.style.cursor = "url('../img/game/eraser-cursor.png'), auto"
-  } else if (tool === "bucket") {
-    gameCanvas.style.cursor = "url('../img/game/bucket-cursor.png'), auto"
-  } else if (tool === "dropper") {
-    gameCanvas.style.cursor = "url('../img/game/dropper-cursor.png'), auto"
-  } else {
-    gameCanvas.style.cursor = "crosshair"
+  if (gameCanvas) {
+    if (tool === "eraser") {
+      gameCanvas.style.cursor = "url('../img/game/eraser-cursor.png'), auto"
+    } else if (tool === "bucket") {
+      gameCanvas.style.cursor = "url('../img/game/bucket-cursor.png'), auto"
+    } else if (tool === "dropper") {
+      gameCanvas.style.cursor = "url('../img/game/dropper-cursor.png'), auto"
+    } else {
+      gameCanvas.style.cursor = "crosshair"
+    }
   }
 }
 
@@ -1115,31 +1168,65 @@ function initializeClient() {
 }
 
 function setupToolListeners() {
-  // Tool selection
-  pencilTool?.addEventListener("click", () => setActiveTool("pencil"))
-  eraserTool?.addEventListener("click", () => setActiveTool("eraser"))
-  bucketTool?.addEventListener("click", () => setActiveTool("bucket"))
-  dropperTool?.addEventListener("click", () => setActiveTool("dropper"))
+  // Tool selection - make sure we're finding the elements correctly
+  const pencilTool = document.getElementById("pencil-tool")
+  const eraserTool = document.getElementById("eraser-tool")
+  const bucketTool = document.getElementById("bucket-tool")
+  const dropperTool = document.getElementById("dropper-tool")
+  const undoBtn = document.getElementById("undo-btn")
+  const redoBtn = document.getElementById("redo-btn")
+  const brushSize = document.getElementById("brush-size")
+
+  console.log("Tool elements:", {
+    pencilTool,
+    eraserTool,
+    bucketTool,
+    dropperTool,
+    undoBtn,
+    redoBtn,
+    brushSize,
+  })
+
+  // Only add event listeners if the elements exist
+  if (pencilTool) pencilTool.addEventListener("click", () => setActiveTool("pencil"))
+  if (eraserTool) eraserTool.addEventListener("click", () => setActiveTool("eraser"))
+  if (bucketTool) bucketTool.addEventListener("click", () => setActiveTool("bucket"))
+  if (dropperTool) dropperTool.addEventListener("click", () => setActiveTool("dropper"))
 
   // Undo/Redo
-  undoBtn?.addEventListener("click", undoAction)
-  redoBtn?.addEventListener("click", redoAction)
+  if (undoBtn) undoBtn.addEventListener("click", undoAction)
+  if (redoBtn) redoBtn.addEventListener("click", redoAction)
 
   // Brush size
-  brushSize?.addEventListener("input", changeBrushSize)
+  if (brushSize) brushSize.addEventListener("input", changeBrushSize)
 
   // Color swatches
+  const colorSwatches = document.querySelectorAll(".color-swatch")
   colorSwatches.forEach((swatch) => {
     swatch.addEventListener("click", () => {
       const color = swatch.dataset.color
-      currentPos.color = color
-      lastColor = color
-      const penColor = document.querySelector("#pen-color")
-      penColor.value = color
-      updateSelectedSwatch(color)
+      if (color) {
+        currentPos.color = color
+        lastColor = color
+        const penColor = document.querySelector("#pen-color")
+        if (penColor) {
+          penColor.value = color
+          updateSelectedSwatch(color)
+        }
+      }
     })
   })
 }
+
+// Add this after setupToolListeners() call
+setTimeout(() => {
+  debugTools()
+
+  // Force show toolbar if we're the drawer
+  if (isDrawer || canDraw) {
+    showToolBar()
+  }
+}, 1000)
 
 // Declare io before using it
 const io = window.io
@@ -1196,3 +1283,12 @@ let guessedWrong
 let showPointsIndicator
 let undoAction
 let redoAction
+let saveCanvasState
+let relMouseCoords
+let floodFill
+let getColorAtPixel
+let drawLine
+let onSubmitBtnClick
+let updatePlayerList
+let getDrawer
+let initTimer

@@ -181,12 +181,10 @@ canvas {
 
 .controls {
   height: auto;
-  display: none; /* This will be changed to flex when needed */
+  display: none;
   align-items: center;
   background: #ddd;
   padding: 10px;
-  border-bottom: 2px solid #000;
-  z-index: 10;
 }
 
 .controls .color {
@@ -209,18 +207,15 @@ canvas {
   flex-wrap: wrap;
   width: 100%;
   gap: 10px;
-  justify-content: center;
 }
 
 .tool-group {
   display: flex;
   align-items: center;
-  gap: 8px;
-  padding: 8px;
-  border: 2px dashed #8f00ff;
-  border-radius: 8px;
-  margin: 5px;
-  background-color: rgba(255, 255, 255, 0.7);
+  gap: 5px;
+  padding: 5px;
+  border: 1px dashed #8f00ff;
+  border-radius: 5px;
 }
 
 .color-picker {
@@ -235,21 +230,12 @@ canvas {
 }
 
 .color-swatch {
-  width: 30px;
-  height: 30px;
-  border: 2px solid #000;
-  border-radius: 5px;
+  width: 20px;
+  height: 20px;
+  border: 1px solid #000;
+  border-radius: 3px;
   cursor: pointer;
   transition: transform 0.1s;
-  margin: 0 2px;
-}
-
-.color-swatch:hover {
-  transform: scale(1.1);
-}
-
-.color-swatch.selected {
-  box-shadow: 0 0 0 3px #8f00ff;
 }
 
 /* Add styles for the copycat mode UI elements */
@@ -375,172 +361,4 @@ canvas {
     opacity: 0;
     transform: translate(-50%, 20px);
   }
-}
-
-/* Album/Review System Styles */
-.album-review-container {
-  width: 800px;
-  margin: 0 auto;
-  background-color: white;
-  border: 2px solid black;
-  border-radius: 10px;
-  padding: 20px;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-}
-
-.album-header {
-  text-align: center;
-  margin-bottom: 20px;
-}
-
-.album-header h2 {
-  color: #8f00ff;
-  margin-bottom: 5px;
-}
-
-.album-navigation {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  margin-bottom: 15px;
-}
-
-.album-nav-btn {
-  background-color: #8f00ff;
-  color: white;
-  border: none;
-  padding: 8px 15px;
-  margin: 0 10px;
-  border-radius: 5px;
-  cursor: pointer;
-  font-size: 16px;
-}
-
-.album-nav-btn:hover {
-  background-color: #7700cc;
-}
-
-#drawingCounter {
-  font-size: 18px;
-  font-weight: bold;
-}
-
-.album-display {
-  margin-bottom: 20px;
-}
-
-.drawing-info {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-top: 10px;
-  padding: 10px;
-  background-color: #f0f0f0;
-  border-radius: 5px;
-}
-
-#drawerName {
-  font-size: 18px;
-  font-weight: bold;
-}
-
-.rating-container {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-
-.star-rating {
-  display: flex;
-}
-
-.star {
-  font-size: 24px;
-  color: #ccc;
-  cursor: pointer;
-  transition: color 0.2s;
-}
-
-.star:hover,
-.star.active {
-  color: #ffdd00;
-}
-
-.album-actions {
-  text-align: center;
-  margin-top: 20px;
-}
-
-.continue-btn {
-  background-color: #adff02;
-  color: black;
-  border: 2px solid black;
-  padding: 10px 20px;
-  font-size: 18px;
-  border-radius: 5px;
-  cursor: pointer;
-}
-
-.continue-btn:hover {
-  background-color: #8f00ff;
-  color: white;
-}
-
-/* Add this to ensure the album canvas has the right background */
-#albumCanvas {
-  background-color: white;
-  border: 1px solid #ccc;
-  display: block;
-  margin: 0 auto;
-}
-
-/* Update the tool buttons to be larger */
-.tool-btn {
-  width: 40px;
-  height: 40px;
-  font-size: 20px;
-  margin: 0 3px;
-  cursor: pointer;
-  background-color: #f0f0f0;
-  border: 2px solid #000;
-  border-radius: 5px;
-  transition: all 0.2s;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.tool-btn:hover {
-  background-color: #e0e0e0;
-  transform: scale(1.05);
-}
-
-.tool-btn.active {
-  background-color: #8f00ff;
-  color: white;
-}
-
-.tool-btn.disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-}
-
-/* Make color swatches larger */
-/* Increase size of color picker */
-#pen-color {
-  width: 40px;
-  height: 40px;
-  cursor: pointer;
-}
-
-/* Improve brush size controls */
-#brush-size {
-  width: 120px;
-  height: 20px;
-}
-
-#size-display {
-  font-size: 16px;
-  min-width: 40px;
-  text-align: center;
 }

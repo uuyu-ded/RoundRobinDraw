@@ -157,7 +157,8 @@ if (isGamePage) {
         p.appendChild(characterImg)
 
         const playerInfo = document.createElement("span")
-        playerInfo.textContent = `${currentRoom.players[i].nickname} - ${currentRoom.players[i].points || 0}`
+        const playerPoints = currentRoom.players[i].points || 0
+        playerInfo.textContent = `${currentRoom.players[i].nickname} -  ${playerPoints}`
         playerInfo.id = `player-${currentRoom.players[i].nickname}`
         p.appendChild(playerInfo)
       } else {
@@ -242,54 +243,39 @@ if (isGamePage) {
       copycatInfo.style.display = "block"
       referenceContainer.style.display = "none"
 
-      if (currentRoom.copycatRound === 0) {
-        // First round - everyone draws
-        gameHeader.innerHTML = "Draw anything you want!"
-        isDrawer = true
-        isCopying = false
-        isViewingReference = false
-        canDraw = true
-        wordIpt.style.display = "none"
-        sendBtn.style.display = "none"
-        showToolBar()
-        copycatInfo.textContent = "Draw anything! Everyone is drawing their own creation."
-      } else {
-        if (currentRoom.copycatPhase === "viewing") {
-          // Viewing phase - show the reference drawing
-          gameHeader.innerHTML = `Memorize this drawing! (${currentRoom.viewingTimeRemaining}s)`
-          isDrawer = false
-          isCopying = false
-          isViewingReference = true
-          canDraw = false
-          wordIpt.style.display = "none"
-          sendBtn.style.display = "none"
-          hideToolBar()
-
-          // Show reference container
-          referenceContainer.style.display = "block"
-        } else if (currentRoom.copycatPhase === "drawing") {
-          // Drawing phase - draw from memory
-          gameHeader.innerHTML = "Now draw from memory!"
-          isDrawer = false
-          isCopying = true
-          isViewingReference = false
-          canDraw = true
-          wordIpt.style.display = "none"
-          sendBtn.style.display = "none"
-          showToolBar()
-
-          // Hide reference container
-          referenceContainer.style.display = "none"
-
-          // Show whose drawing they're copying
-          if (sourcePlayerNickname) {
-            copycatInfo.textContent = `Draw ${sourcePlayerNickname}'s drawing from memory!`
-          }
+      if (currentRoom.copycatPhase === "drawing") {
+        if (currentRoom.copycatRound === 0) {
+          gameHeader.innerHTML = "Draw anything you want!";
+          copycatInfo.textContent = "Draw anything! This will be used in later rounds.";
+        } else {
+          gameHeader.innerHTML = "Now draw from memory!";
+          copycatInfo.textContent = `Draw ${sourcePlayerNickname}'s drawing from memory!`;
         }
+        
+        isDrawer = true;
+        isCopying = currentRoom.copycatRound > 0;
+        isViewingReference = false;
+        canDraw = true;
+        wordIpt.style.display = "none";
+        sendBtn.style.display = "none";
+        showToolBar();
+      } 
+      else if (currentRoom.copycatPhase === "viewing") {
+        gameHeader.innerHTML = `Memorize this drawing! (${currentRoom.viewingTimeRemaining}s)`;
+        copycatInfo.textContent = `Memorize ${sourcePlayerNickname}'s drawing!`;
+        
+        isDrawer = false;
+        isCopying = false;
+        isViewingReference = true;
+        canDraw = false;
+        wordIpt.style.display = "none";
+        sendBtn.style.display = "none";
+        hideToolBar();
+        
+        referenceContainer.style.display = "block";
       }
     }
   }
-
   function stopTimer() {
     timer.innerHTML = "0:00"
     imgClock.classList.add("animate")
@@ -342,6 +328,9 @@ if (isGamePage) {
   function guessedWrong() {
     wordIpt.value = ""
     wordIpt.style.color = "red"
+    setTimeout(() => {
+      wordIpt.style.color = "" 
+    }, 1000)
   }
 
   function throttle(callback, delay) {
@@ -445,7 +434,9 @@ if (isGamePage) {
         context.drawImage(img, 0, 0)
 
         // Emit the canvas state to other players
-        socket.emit("canvasState", { imageData: redoState, roomCode }, player)
+        if (!currentRoom || currentRoom.gameMode !== "copycat" || (currentRoom.gameMode === "guess" && isDrawer)) {
+          socket.emit("canvasState", { imageData: drawHistory[currentStep], roomCode }, player)
+        }
       }
       img.src = redoState
 
@@ -517,7 +508,10 @@ if (isGamePage) {
     saveCanvasState()
 
     // Emit the fill action to other players
-    socket.emit("fillAction", { startX, startY, fillColor, roomCode }, player)
+    if (!currentRoom || currentRoom.gameMode !== "copycat" || (currentRoom.gameMode === "guess" && isDrawer)) {
+      socket.emit("fillAction", { startX, startY, fillColor, roomCode }, player)
+    }
+  
   }
 
   // Get color at specific pixel (color dropper tool)
@@ -564,7 +558,7 @@ if (isGamePage) {
     context.stroke()
     context.closePath()
 
-    if (emit) {
+    if (emit && (!currentRoom || currentRoom.gameMode !== "copycat" || (currentRoom.gameMode === "guess" && isDrawer))) {
       socket.emit(
         "gameDrawing",
         {
@@ -584,7 +578,15 @@ if (isGamePage) {
   function onSubmitBtnClick() {
     const text = wordIpt.value
     if (text) {
+      const normalizedGuess = text.toLowerCase().trim()
+    const normalizedWord = currentRoom.word.toLowerCase().trim()
+    if (normalizedGuess === normalizedWord) {
       socket.emit("guessWord", player, text)
+    } else {
+      // Optional: Provide feedback that the guess was wrong
+      guessedWrong()
+    }
+  }
     }
   }
 
@@ -754,11 +756,15 @@ if (isGamePage) {
   }
 
   function onDrawingEvent(data) {
-    drawLine(data.x0, data.y0, data.x1, data.y1, data.color, data.size, data.tool, false)
+    if (!currentRoom || currentRoom.gameMode !== "copycat" || isViewingReference) {
+      drawLine(data.x0, data.y0, data.x1, data.y1, data.color, data.size, data.tool, false)
+    }
   }
 
   function onFillAction(data) {
-    floodFill(data.startX, data.startY, data.fillColor)
+    if (!currentRoom || currentRoom.gameMode !== "copycat" || isViewingReference) {
+      floodFill(data.startX, data.startY, data.fillColor)
+    }
   }
 
   function onCanvasState(data) {
@@ -769,6 +775,16 @@ if (isGamePage) {
       context.drawImage(img, 0, 0)
     }
     img.src = data.imageData
+  }function onCanvasState(data) {
+    if (!currentRoom || currentRoom.gameMode !== "copycat" || isViewingReference) {
+      const img = new Image()
+      img.crossOrigin = "anonymous"
+      img.onload = () => {
+        context.clearRect(0, 0, gameCanvas.width, gameCanvas.height)
+        context.drawImage(img, 0, 0)
+      }
+      img.src = data.imageData
+    }
   }
 
   function onDrawingToCopy(data) {
@@ -841,6 +857,16 @@ if (isGamePage) {
     // If we're not the drawer, we should update our history
     if (!isDrawer) {
       saveCanvasState()
+    }function onCanvasState(data) {
+      if (!currentRoom || currentRoom.gameMode !== "copycat" || isViewingReference) {
+        const img = new Image()
+        img.crossOrigin = "anonymous"
+        img.onload = () => {
+          context.clearRect(0, 0, gameCanvas.width, gameCanvas.height)
+          context.drawImage(img, 0, 0)
+        }
+        img.src = data.imageData
+      }
     }
   }
 
@@ -1086,7 +1112,10 @@ if (isGamePage) {
     socket.on("guessedRight", onGuessedRight)
     socket.on("guessedWrong", onGuessedWrong)
     socket.on("wordWas", onWordWas)
-
+    socket.on("pointsUpdated", (updatedRoom) => {
+      currentRoom = updatedRoom
+      updatePlayerList()
+    })
     socket.on("resetBoard", onClearBoard)
 
     // Add this event listener in the setupSocket function
@@ -1187,4 +1216,4 @@ if (isGamePage) {
       rateDrawing(rating)
     })
   })
-}
+

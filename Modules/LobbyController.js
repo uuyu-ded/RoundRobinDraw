@@ -32,7 +32,7 @@ class LobbyController {
     let currentRoom = this.getRoomByCode(player.roomCode)
 
     if (!currentRoom) {
-      currentRoom = new Room(8, player.roomCode)
+      currentRoom = new Room(5, player.roomCode)
       currentRoom.addPlayer(player)
 
       this.addRoom(currentRoom)
@@ -457,13 +457,13 @@ class LobbyController {
         `Room ${roomCode} is in copycat mode, round: ${currentRoom.copycatRound}, phase: ${currentRoom.copycatPhase}`,
       )
 
-      if (currentRoom.copycatPhase === "viewing") {
+      if (currentRoom.copycatPhase === "viewing" && currentRoom.copycatRound > 0) {
         // Load all drawings from the previous round
         console.log(`Loading drawings from round ${currentRoom.copycatRound - 1} for viewing phase`)
         const previousRound = currentRoom.copycatRound - 1
         const drawings = await Drawing.find({
           roomCode: currentRoom.roomCode,
-          round: previousRound,
+          round: previousDrawingRound,
         })
 
         console.log(`Found ${drawings.length} drawings from previous round`)
@@ -476,7 +476,7 @@ class LobbyController {
         })
 
         // Assign drawings to players
-        currentRoom.assignDrawingsToCopy()
+        currentRoom.assignDrawingsToCopy();
         console.log(`Assigned drawings to copy:`)
         Object.entries(currentRoom.copycatAssignments).forEach(([player, source]) => {
           console.log(`${player} will copy ${source}'s drawing`)
@@ -484,17 +484,13 @@ class LobbyController {
 
         // Send each player their assigned drawing
         for (const player of currentRoom.players) {
-          const sourceNickname = currentRoom.copycatAssignments[player.nickname]
+          const sourceNickname = currentRoom.copycatAssignments[player.nickname];
           if (sourceNickname && currentRoom.copycatDrawings[sourceNickname]) {
-            console.log(`Sending ${sourceNickname}'s drawing to ${player.nickname}`)
             io.to(player.socketId).emit("drawingToCopy", {
               drawingData: currentRoom.copycatDrawings[sourceNickname],
               sourcePlayer: sourceNickname,
-            })
-            io.to(player.socketId).emit("serverLog", `You are copying ${sourceNickname}'s drawing`)
-          } else {
-            console.log(`No drawing found for ${player.nickname} to copy`)
-            io.to(player.socketId).emit("serverLog", `Error: No drawing found for you to copy`)
+            });
+            io.to(player.socketId).emit("serverLog", `Memorize ${sourceNickname}'s drawing!`);
           }
         }
       }

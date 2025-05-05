@@ -47,6 +47,31 @@ class Room {
       'Couple',
       'Cinema',
       'Moonwalk',
+      "Mermaid",
+      "Glinda",
+      "Elpheba",
+      "Origami",
+      "Hourglass",
+      "Lirilli Larilla",
+      "Bonega Ambalabu",
+      "Tung tung tung tung sahur",
+      "Illuminati",
+      "Virus",
+      "Joker",
+      "John Pork",
+      "Pikachu",
+      "Mickey Mouse",
+      "Hamburger",
+      "Chiikawa",
+      "Iron Fist",
+      "Emma Frost",
+      "Iron Man",
+      "Cloak and Dagger",
+      "Tace cat",
+      "Saitama",
+      "Gojo",
+      "Labubu",
+      "Donald Trump",
     ]
     this.word = undefined
   }
@@ -197,34 +222,26 @@ class Room {
         player.alreadyPointed = false
       })
       this.everyoneReady = false
-      console.log(`[advanceCopycatRound] Reset all players' ready status`)
+      if (this.copycatRound >= this.totalRounds) {
+        console.log(`[advanceCopycatRound] Game over - completed all rounds`);
+        return false;
+      }
+      this.copycatRound++;
 
       // Reset the albumShown flag for the new round
       this.albumShown = false
 
-      // Check if we've completed all rounds
-      if (this.copycatRound > this.totalRounds) {
-        console.log(`[advanceCopycatRound] Game over - completed all rounds`)
-        // Game is over
-        return false
-      }
 
       if (this.copycatRound === 0) {
         this.copycatPhase = "drawing"
       }
 
-      // For round 1, we start with viewing phase
-      if (this.copycatRound === 1) {
-        console.log(`[advanceCopycatRound] Starting viewing phase for round 1`)
-        this.startViewingPhase()
-      } else {
-        if (this.copycatPhase === "drawing") {
-          console.log(`[advanceCopycatRound] Switching from drawing to viewing phase`)
-          this.startViewingPhase()
-        } else {
-          console.log(`[advanceCopycatRound] Switching from viewing to drawing phase`)
-          this.startDrawingPhase()
-        }
+      else if (this.copycatRound % 2 === 0) {
+        this.copycatPhase = "drawing";
+      }
+      else {
+        this.copycatPhase = "viewing";
+        this.viewingTimeRemaining = 20; // Reset viewing timer
       }
 
       console.log(`[advanceCopycatRound] New round state: Round ${this.copycatRound}, Phase: ${this.copycatPhase}`)

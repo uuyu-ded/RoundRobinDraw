@@ -337,6 +337,9 @@ function getDrawer() {
 
 function stopTimer() {
   if (timer) timer.innerHTML = "0:00"
+  const headerTimer = document.getElementById("header-timer")
+  if (headerTimer) headerTimer.innerHTML = "0:00"
+
   if (imgClock) imgClock.classList.add("animate")
   if (wordIpt) {
     wordIpt.value = ""
@@ -370,11 +373,14 @@ function initTimer() {
     rightWord.style.display = "none"
   }
 
+  const headerTimer = document.getElementById("header-timer")
+
   cont = initialCont
   timerInterval = setInterval(() => {
     cont--
     const time = new Date(cont * 1000).toISOString().substr(15, 4)
     if (timer) timer.innerHTML = time
+    if (headerTimer) headerTimer.innerHTML = time
 
     socket.emit("updateTimeRemaining", roomCode, cont)
 

@@ -1,7 +1,7 @@
 {
-  "name": "drawit",
+  "name": "roundrobindraw",
   "version": "1.0.0",
-  "description": "Draw.it",
+  "description": "roundrobindraw is a drawing app that allows users to create and share drawings in real-time. It uses WebSockets for real-time communication and Express.js for the server-side framework.",
   "main": "index.js",
   "scripts": {
     "start": "node index.js",

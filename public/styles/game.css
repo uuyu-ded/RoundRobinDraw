@@ -24,8 +24,10 @@ canvas {
   padding-right: 0;
   margin-left: auto;
   margin-right: auto;
-  display: block;
+  display: block !important; /* Force display */
   touch-action: none;
+  background-color: white !important; /* Force background */
+  border: 2px solid black !important; /* Force border */
 }
 
 .row {
@@ -108,10 +110,12 @@ canvas {
   background-color: white;
   border: 1px solid black;
   margin: auto;
+  display: block !important; /* Force display */
 }
 
 #gameCanvas {
   margin: 0 auto 0;
+  z-index: 5; /* Ensure canvas is on top */
 }
 
 #wordIpt {
@@ -179,12 +183,59 @@ canvas {
   }
 }
 
+/* Timer styling */
+.game-timer-display {
+  display: flex;
+  align-items: center;
+  background-color: rgba(255, 255, 255, 0.8);
+  border: 2px solid #000;
+  border-radius: 10px;
+  padding: 5px 10px;
+  margin-left: 15px;
+  box-shadow: 2px 2px 0px #000;
+  transform: rotate(-2deg);
+}
+
+.timer-icon {
+  font-size: 24px;
+  margin-right: 8px;
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.1);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+#header-timer {
+  font-size: 20px;
+  font-weight: bold;
+  color: #8f00ff;
+}
+
+#img-clock {
+  transition: transform 0.3s ease;
+}
+
+#img-clock:hover {
+  transform: rotate(15deg);
+}
+
 .controls {
   height: auto;
-  display: none;
+  display: flex !important; /* Force display */
   align-items: center;
   background: #ddd;
   padding: 10px;
+  border-bottom: 2px solid #000;
+  z-index: 10;
 }
 
 .controls .color {
@@ -207,15 +258,18 @@ canvas {
   flex-wrap: wrap;
   width: 100%;
   gap: 10px;
+  justify-content: center;
 }
 
 .tool-group {
   display: flex;
   align-items: center;
-  gap: 5px;
-  padding: 5px;
-  border: 1px dashed #8f00ff;
-  border-radius: 5px;
+  gap: 8px;
+  padding: 8px;
+  border: 2px dashed #8f00ff;
+  border-radius: 8px;
+  margin: 5px;
+  background-color: rgba(255, 255, 255, 0.7);
 }
 
 .color-picker {
@@ -230,12 +284,21 @@ canvas {
 }
 
 .color-swatch {
-  width: 20px;
-  height: 20px;
-  border: 1px solid #000;
-  border-radius: 3px;
+  width: 30px;
+  height: 30px;
+  border: 2px solid #000;
+  border-radius: 5px;
   cursor: pointer;
   transition: transform 0.1s;
+  margin: 0 2px;
+}
+
+.color-swatch:hover {
+  transform: scale(1.1);
+}
+
+.color-swatch.selected {
+  box-shadow: 0 0 0 3px #8f00ff;
 }
 
 /* Add styles for the copycat mode UI elements */
@@ -361,4 +424,112 @@ canvas {
     opacity: 0;
     transform: translate(-50%, 20px);
   }
+}
+
+/* Album/Review System Styles */
+.album-review-container {
+  width: 800px;
+  margin: 0 auto;
+  background-color: white;
+  border: 2px solid black;
+  border-radius: 10px;
+  padding: 20px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.album-header {
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.album-header h2 {
+  color: #8f00ff;
+  margin-bottom: 5px;
+}
+
+.album-navigation {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-bottom: 15px;
+}
+
+.album-nav-btn {
+  background-color: #8f00ff;
+  color: white;
+  border: none;
+  padding: 8px 15px;
+  margin: 0 10px;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 16px;
+}
+
+.album-nav-btn:hover {
+  background-color: #7700cc;
+}
+
+#drawingCounter {
+  font-size: 18px;
+  font-weight: bold;
+}
+
+.album-display {
+  margin-bottom: 20px;
+}
+
+.drawing-info {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 10px;
+  padding: 10px;
+  background-color: #f0f0f0;
+  border-radius: 5px;
+}
+
+#drawerName {
+  font-size: 18px;
+  font-weight: bold;
+}
+
+.rating-container {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.star-rating {
+  display: flex;
+}
+
+.star {
+  font-size: 24px;
+  color: #ccc;
+  cursor: pointer;
+  transition: color 0.2s;
+}
+
+.star:hover,
+.star.active {
+  color: #ffdd00;
+}
+
+.album-actions {
+  text-align: center;
+  margin-top: 20px;
+}
+
+.continue-btn {
+  background-color: #adff02;
+  color: black;
+  border: 2px solid black;
+  padding: 10px 20px;
+  font-size: 18px;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.continue-btn:hover {
+  background-color: #96e600;
 }

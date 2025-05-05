@@ -18,6 +18,16 @@ body {
   margin: auto;
   width: 50%;
   font-size: xx-large;
+  background-color: var(--accent-color);
+  border-bottom: var(--sketchy-border);
+  border-left: var(--sketchy-border);
+  border-right: var(--sketchy-border);
+  padding: 10px;
+  margin-bottom: 15px;
+}
+
+.slide-image{
+  width: 40%;
 }
 
 .logo-container {
@@ -37,15 +47,32 @@ body {
   transform: rotate(5deg);
 }
 
+/* Main container for side-by-side layout */
+.main-container {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: flex-start;
+  gap: 30px;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 20px;
+}
+
 .options {
   display: flex;
   justify-content: center;
+  align-items: center;
+  gap: 20px;
 }
 
 .roomOptions {
-  margin-top: 10vh;
-  max-width: 400px;
-  text-align: center;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 20px;
+  min-width: 300px;
 }
 
 .roomBtn {
@@ -53,7 +80,7 @@ body {
   width: 300px;
   font-size: 36px;
   box-sizing: border-box;
-  margin: 1rem;
+  margin: 0.5rem;
   padding: 1rem;
   border: 3px solid #000;
   border-radius: 5px;
@@ -66,14 +93,15 @@ body {
 
 /* Tutorial Slideshow Styles */
 .tutorial-container {
-  max-width: 800px;
-  margin: 30px auto;
+  max-width: 600px;
+  margin: 0;
   position: relative;
   box-shadow: 0 0 20px rgba(0, 0, 0, 0.3);
   border-radius: 10px;
   overflow: hidden;
   background-color: white;
   border: 3px solid #000;
+  flex: 1;
 }
 
 .tutorial-header {
@@ -87,7 +115,7 @@ body {
 
 .slideshow {
   position: relative;
-  height: 400px;
+  height: 300px;
 }
 
 .slide {
@@ -112,7 +140,7 @@ body {
 }
 
 .slide-content {
-  max-width: 80%;
+  max-width: 90%;
 }
 
 .slide h2 {
@@ -124,14 +152,6 @@ body {
   font-size: 18px;
   line-height: 1.6;
   margin-bottom: 20px;
-}
-
-.slide-image {
-  max-width: 100%;
-  max-height: 200px;
-  margin: 15px 0;
-  border: 2px solid #8f00ff;
-  border-radius: 5px;
 }
 
 .slide-nav {
@@ -208,5 +228,35 @@ body {
   }
   to {
     opacity: 0;
+  }
+}
+
+/* Responsive design */
+@media (max-width: 1000px) {
+  .main-container {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .tutorial-container {
+    margin-bottom: 30px;
+    width: 100%;
+    max-width: 600px;
+  }
+
+  .roomOptions {
+    width: 100%;
+    max-width: 600px;
+  }
+}
+
+@media (max-width: 600px) {
+  .roomBtn {
+    width: 100%;
+    font-size: 28px;
+  }
+
+  .slideshow {
+    height: 350px;
   }
 }

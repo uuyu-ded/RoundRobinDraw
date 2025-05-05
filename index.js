@@ -147,6 +147,15 @@ function onConnection(socket) {
       console.error("Error changing game mode:", error)
     }
   })
+
+  // Add the new socket event handler for rating drawings
+  socket.on("rateDrawing", (data) => {
+    try {
+      lobbyController.rateDrawing(io, data)
+    } catch (error) {
+      console.error("Error rating drawing:", error)
+    }
+  })
 }
 
 io.on("connection", onConnection)

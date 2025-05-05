@@ -19,6 +19,7 @@ class Room {
     this.copycatPhase = "drawing" // "viewing" or "drawing"
     this.viewingTimeRemaining = 20 // Time to view the reference drawing (in seconds)
     this.totalRounds = 0 // Total number of rounds to play in copycat mode
+    this.albumShown = false // Track if we've shown the album for the current round
     this.words = [
       "Astronauta",
       "Leite",
@@ -183,7 +184,12 @@ class Room {
   // Advance to the next copycat round
   advanceCopycatRound() {
     if (this.gameMode === "copycat") {
-      this.copycatRound++
+      console.log(`[advanceCopycatRound] Current round: ${this.copycatRound}, Phase: ${this.copycatPhase}`)
+
+      if (this.copycatRound > 0 || this.copycatPhase === "drawing") {
+        this.copycatRound++
+      }
+      console.log(`[advanceCopycatRound] Advanced to round: ${this.copycatRound}`)
 
       // Reset all players' ready status at the start of each round
       this.players.forEach((player) => {
@@ -191,25 +197,37 @@ class Room {
         player.alreadyPointed = false
       })
       this.everyoneReady = false
+      console.log(`[advanceCopycatRound] Reset all players' ready status`)
+
+      // Reset the albumShown flag for the new round
+      this.albumShown = false
 
       // Check if we've completed all rounds
       if (this.copycatRound > this.totalRounds) {
+        console.log(`[advanceCopycatRound] Game over - completed all rounds`)
         // Game is over
         return false
       }
 
+      if (this.copycatRound === 0) {
+        this.copycatPhase = "drawing"
+      }
+
       // For round 1, we start with viewing phase
       if (this.copycatRound === 1) {
+        console.log(`[advanceCopycatRound] Starting viewing phase for round 1`)
         this.startViewingPhase()
-      } else if (this.copycatRound > 1) {
-        // For subsequent rounds, alternate between viewing and drawing
+      } else {
         if (this.copycatPhase === "drawing") {
+          console.log(`[advanceCopycatRound] Switching from drawing to viewing phase`)
           this.startViewingPhase()
         } else {
+          console.log(`[advanceCopycatRound] Switching from viewing to drawing phase`)
           this.startDrawingPhase()
         }
       }
 
+      console.log(`[advanceCopycatRound] New round state: Round ${this.copycatRound}, Phase: ${this.copycatPhase}`)
       return true
     }
     return true

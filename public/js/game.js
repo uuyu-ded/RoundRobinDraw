@@ -10,6 +10,12 @@ const rightWord = document.getElementById("rightWord")
 const gameCanvas = document.getElementById("gameCanvas")
 const gameMode = document.getElementById("gameMode")
 
+// Add these variables at the top with the other variable declarations
+let albumMode = false
+let currentAlbumIndex = 0
+let albumDrawings = []
+let ratings = {}
+
 // Create these elements if they don't exist in the HTML
 const roundInfo = document.getElementById("roundInfo") || document.createElement("p")
 const copycatInfo = document.getElementById("copycatInfo") || document.createElement("p")
@@ -59,6 +65,17 @@ const brushSize = document.getElementById("brush-size")
 const sizeDisplay = document.getElementById("size-display")
 const colorSwatches = document.querySelectorAll(".color-swatch")
 
+// Add these DOM element references after the other element references
+const albumReviewContainer = document.getElementById("albumReviewContainer") || document.createElement("div")
+const albumCanvas = document.getElementById("albumCanvas")
+const albumContext = albumCanvas?.getContext("2d")
+const prevDrawingBtn = document.getElementById("prevDrawing")
+const nextDrawingBtn = document.getElementById("nextDrawing")
+const drawingCounter = document.getElementById("drawingCounter")
+const drawerNameElement = document.getElementById("drawerName")
+const continueFromAlbumBtn = document.getElementById("continueFromAlbum")
+const starRating = document.querySelectorAll(".star")
+
 let socket
 let player
 let currentRoom
@@ -102,11 +119,27 @@ const currentPos = { color: "#000000", x: 0, y: 0, size: 2 }
 const targetPos = { color: "#000000", x: 0, y: 0, size: 2 }
 let lastColor = "#000000" // Store last color for eraser toggle
 
+// Add this function near the beginning of the file, after the variable declarations
+
+function showServerLog(message) {
+  const logNotification = document.createElement("div")
+  logNotification.className = "server-log-notification"
+  logNotification.textContent = message
+  document.body.appendChild(logNotification)
+
+  setTimeout(() => {
+    document.body.removeChild(logNotification)
+  }, 3000)
+}
+
 // Check if we're on the game page
 const isGamePage = window.location.pathname.includes("/game") && gameCanvas !== null
 
 // Only initialize game functionality if we're on the game page
 if (isGamePage) {
+  // Declare canvasDiv here
+  const canvasDiv = document.getElementById("canvasDiv")
+
   function updatePlayerList() {
     playersList.innerHTML = ""
 
@@ -205,10 +238,10 @@ if (isGamePage) {
         sendBtn.style.display = "block"
         hideToolBar()
       }
-    }  else if (currentRoom.gameMode === "copycat") {
+    } else if (currentRoom.gameMode === "copycat") {
       copycatInfo.style.display = "block"
       referenceContainer.style.display = "none"
-  
+
       if (currentRoom.copycatRound === 0) {
         // First round - everyone draws
         gameHeader.innerHTML = "Draw anything you want!"
@@ -231,7 +264,7 @@ if (isGamePage) {
           wordIpt.style.display = "none"
           sendBtn.style.display = "none"
           hideToolBar()
-  
+
           // Show reference container
           referenceContainer.style.display = "block"
         } else if (currentRoom.copycatPhase === "drawing") {
@@ -244,10 +277,10 @@ if (isGamePage) {
           wordIpt.style.display = "none"
           sendBtn.style.display = "none"
           showToolBar()
-  
+
           // Hide reference container
           referenceContainer.style.display = "none"
-  
+
           // Show whose drawing they're copying
           if (sourcePlayerNickname) {
             copycatInfo.textContent = `Draw ${sourcePlayerNickname}'s drawing from memory!`
@@ -811,6 +844,142 @@ if (isGamePage) {
     }
   }
 
+  // Add this function to handle the album review system
+  function showAlbumReview(drawings) {
+    // Hide the game canvas and show the album review
+    if (canvasDiv) canvasDiv.style.display = "none"
+    albumReviewContainer.style.display = "block"
+
+    // Store the drawings
+    albumDrawings = drawings
+    currentAlbumIndex = 0
+
+    // Initialize ratings object
+    ratings = {}
+
+    // Update the drawing counter
+    drawingCounter.textContent = `1/${albumDrawings.length}`
+
+    // Display the first drawing
+    if (albumDrawings.length > 0) {
+      displayDrawingInAlbum(0)
+    }
+
+    // Reset star ratings
+    resetStarRatings()
+
+    // Set album mode flag
+    albumMode = true
+  }
+
+  // Function to display a drawing in the album
+  function displayDrawingInAlbum(index) {
+    if (index < 0 || index >= albumDrawings.length) return
+
+    const drawing = albumDrawings[index]
+
+    // Clear the canvas
+    albumContext.clearRect(0, 0, albumCanvas.width, albumCanvas.height)
+
+    // Load and display the drawing
+    const img = new Image()
+    img.crossOrigin = "anonymous"
+    img.onload = () => {
+      albumContext.drawImage(img, 0, 0)
+    }
+    img.src = drawing.drawingData
+
+    // Update drawer name
+    drawerNameElement.textContent = `Artist: ${drawing.playerNickname}`
+
+    // Update drawing counter
+    drawingCounter.textContent = `${index + 1}/${albumDrawings.length}`
+
+    // Update star ratings to reflect any previous rating
+    updateStarRatingDisplay(drawing.playerNickname)
+  }
+
+  // Function to navigate to the previous drawing
+  function navigateToPrevDrawing() {
+    if (currentAlbumIndex > 0) {
+      currentAlbumIndex--
+      displayDrawingInAlbum(currentAlbumIndex)
+    }
+  }
+
+  // Function to navigate to the next drawing
+  function navigateToNextDrawing() {
+    if (currentAlbumIndex < albumDrawings.length - 1) {
+      currentAlbumIndex++
+      displayDrawingInAlbum(currentAlbumIndex)
+    }
+  }
+
+  // Function to reset all star ratings display
+  function resetStarRatings() {
+    starRating.forEach((star) => {
+      star.classList.remove("active")
+    })
+  }
+
+  // Function to update star rating display for a specific drawer
+  function updateStarRatingDisplay(drawerNickname) {
+    // Reset all stars first
+    resetStarRatings()
+
+    // If this drawing has been rated, show the rating
+    if (ratings[drawerNickname]) {
+      const rating = ratings[drawerNickname]
+      starRating.forEach((star) => {
+        if (Number.parseInt(star.dataset.rating) <= rating) {
+          star.classList.add("active")
+        }
+      })
+    }
+  }
+
+  // Function to rate a drawing
+  function rateDrawing(rating) {
+    if (currentAlbumIndex >= 0 && currentAlbumIndex < albumDrawings.length) {
+      const drawerNickname = albumDrawings[currentAlbumIndex].playerNickname
+      ratings[drawerNickname] = rating
+
+      // Update the display
+      updateStarRatingDisplay(drawerNickname)
+
+      // Send the rating to the server
+      socket.emit("rateDrawing", {
+        roomCode: currentRoom.roomCode,
+        drawerNickname: drawerNickname,
+        rating: rating,
+        raterNickname: player.nickname,
+      })
+
+      showServerLog(`You rated ${drawerNickname}'s drawing ${rating} stars`)
+    }
+  }
+
+  // Function to continue from album review
+  function continueFromAlbum() {
+    // Hide album review and show game canvas
+    albumReviewContainer.style.display = "none"
+    if (canvasDiv) canvasDiv.style.display = "block"
+
+    // Set album mode flag
+    albumMode = false
+
+    // Tell the server we're ready for the next round
+    socket.emit("playerReadyChanged", {
+      nickname: player.nickname,
+      roomCode: player.roomCode,
+      character: player.character,
+      ready: true,
+      socketId: socket.id,
+    })
+
+    showServerLog("Ready for next round")
+  }
+
   function onNewGame(data) {
     startGameSeconds = initialStartGameSeconds
     const startGameTimer = setInterval(() => {
@@ -819,6 +988,11 @@ if (isGamePage) {
         cont = initialCont
         currentRoom = data
         context.clearRect(0, 0, gameCanvas.width, gameCanvas.height)
+
+        // Make sure album review is hidden and game canvas is shown
+        albumReviewContainer.style.display = "none"
+        if (canvasDiv) canvasDiv.style.display = "block"
+
         getDrawer()
         initTimer()
 
@@ -914,6 +1088,15 @@ if (isGamePage) {
     socket.on("wordWas", onWordWas)
 
     socket.on("resetBoard", onClearBoard)
+
+    // Add this event listener in the setupSocket function
+    socket.on("serverLog", (message) => {
+      console.log(`[Server Log] ${message}`)
+      showServerLog(message)
+    })
+
+    // Add this to the socket event handlers section
+    socket.on("showAlbum", showAlbumReview)
   }
 
   function checkParameters() {
@@ -991,4 +1174,17 @@ if (isGamePage) {
   gameCanvas?.addEventListener("touchend", onMouseUp, false)
   gameCanvas?.addEventListener("touchcancel", onMouseUp, false)
   gameCanvas?.addEventListener("touchmove", throttle(onMouseMove, 10), false)
+
+  // Add these event listeners at the end of the file where other event listeners are added
+  prevDrawingBtn?.addEventListener("click", navigateToPrevDrawing)
+  nextDrawingBtn?.addEventListener("click", navigateToNextDrawing)
+  continueFromAlbumBtn?.addEventListener("click", continueFromAlbum)
+
+  // Add event listeners for star ratings
+  starRating.forEach((star) => {
+    star.addEventListener("click", function () {
+      const rating = Number.parseInt(this.dataset.rating)
+      rateDrawing(rating)
+    })
+  })
 }

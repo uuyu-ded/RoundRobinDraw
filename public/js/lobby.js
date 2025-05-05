@@ -201,6 +201,12 @@ function onReadyClick() {
     return
   }
 
+  // Make sure the socketId is set correctly
+  if (!player.socketId || player.socketId === undefined) {
+    player.socketId = socket.id
+    console.log("[onReadyClick] Updated player socketId to:", socket.id)
+  }
+
   if (readyButton.className === "readyButton ready") {
     readyButton.className = "readyButton cancel"
     readyButton.innerHTML = "Cancel"
@@ -209,13 +215,13 @@ function onReadyClick() {
     // Log the player data being sent
     console.log("[onReadyClick] Setting player ready:", player)
 
-    // Make sure we're sending the complete player object
+    // Make sure we're sending the complete player object with valid socketId
     socket.emit("playerReadyChanged", {
       nickname: player.nickname,
       roomCode: player.roomCode,
       character: player.character,
       ready: true,
-      socketId: socket.id,
+      socketId: socket.id, // Always use the current socket.id
     })
   } else {
     readyButton.className = "readyButton ready"
@@ -225,15 +231,26 @@ function onReadyClick() {
     // Log the player data being sent
     console.log("[onReadyClick] Setting player not ready:", player)
 
-    // Make sure we're sending the complete player object
+    // Make sure we're sending the complete player object with valid socketId
     socket.emit("playerReadyChanged", {
       nickname: player.nickname,
       roomCode: player.roomCode,
       character: player.character,
       ready: false,
-      socketId: socket.id,
+      socketId: socket.id, // Always use the current socket.id
     })
   }
+}
+
+function showServerLog(message) {
+  const logNotification = document.createElement("div")
+  logNotification.className = "server-log-notification"
+  logNotification.textContent = message
+  document.body.appendChild(logNotification)
+
+  setTimeout(() => {
+    document.body.removeChild(logNotification)
+  }, 3000)
 }
 
 function showErrorMessage(message) {
@@ -288,6 +305,18 @@ function onMouseMove(event) {
 function onJoinComplete(updatedRoom) {
   console.log("[onJoinComplete] Room data:", updatedRoom)
   currentRoom = updatedRoom
+
+  // Make sure player has the correct socketId
+  if (currentRoom.mostRecentPlayer && currentRoom.mostRecentPlayer.nickname === nickname) {
+    player = currentRoom.mostRecentPlayer
+
+    // Ensure socketId is set
+    if (!player.socketId || player.socketId === undefined) {
+      player.socketId = socket.id
+      console.log("[onJoinComplete] Updated player socketId to:", socket.id)
+    }
+  }
+
   roomCodeHeader.innerHTML = `Room ${currentRoom.roomCode}`
   updatePlayerList()
 }
@@ -392,6 +421,11 @@ function setupSocket() {
 
     socket.on("playersChanged", onPlayersChanged)
     socket.on("playerDrawing", onDrawingEvent)
+
+    socket.on("serverLog", (message) => {
+      console.log(`[Server Log] ${message}`)
+      showServerLog(message)
+    })
   } else {
     console.error("Socket.io is not loaded!")
     lobbyHeader.innerHTML = "Error: Socket.io not loaded!"
@@ -417,7 +451,7 @@ function initializeClient() {
     roomCode: roomCode,
     character: characterId,
     ready: false,
-    socketId: socket.id, // Add socketId to player object
+    socketId: socket.id, // Make sure socketId is set
   }
 
   console.log("[initializeClient] Initializing client with player:", player)

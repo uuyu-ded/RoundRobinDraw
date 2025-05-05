@@ -272,280 +272,6 @@ canvas {
   transform: rotate(-1deg);
   box-shadow: 2px 2px 0px #000;
 }
-html {
-  height: 100%;
-  margin: 0;
-  padding: 0;
-}
-
-body {
-  background-color: #01befe;
-  height: auto;
-  width: auto;
-  min-height: 100vh;
-  margin: 0;
-  padding: 0;
-}
-
-* {
-  font-family: cursive;
-  font-weight: bolder;
-  box-sizing: border-box;
-}
-
-canvas {
-  padding-left: 0;
-  padding-right: 0;
-  margin-left: auto;
-  margin-right: auto;
-  display: block;
-  touch-action: none;
-}
-
-.row {
-  height: 100%;
-  margin: 0;
-}
-
-.column {
-  float: left;
-}
-
-.columnLeft {
-  position: relative;
-  width: 30%;
-  height: 100vh;
-}
-
-.columnRight {
-  width: 70%;
-  height: 100vh;
-}
-
-.header {
-  color: #8f00ff;
-  text-align: center;
-  margin: auto;
-  width: 50%;
-  font-size: xx-large;
-  display: flex;
-  justify-content: center;
-}
-
-.footer {
-}
-
-#header {
-  text-align: center;
-  margin: auto;
-  width: 50%;
-  font-size: xx-large;
-}
-
-#playerList {
-  width: 80%;
-  margin: auto;
-  margin-left: 2vh;
-  font-size: x-large;
-}
-
-#playersHeader {
-  text-decoration: underline;
-}
-
-#players {
-  column-count: auto;
-  max-width: 100%;
-}
-
-#boxInputText {
-  display: flex;
-  width: 800px;
-  flex-direction: row;
-  align-items: center;
-  justify-content: space-between;
-  background-color: #e4e4e4;
-  padding: 1rem;
-  border: 2px solid black;
-  margin-left: -1px;
-}
-
-#footer {
-  display: flex;
-  padding: 10px;
-  align-items: center;
-  justify-content: space-around;
-}
-
-#canvasDiv {
-  width: 800px;
-  background-color: white;
-  border: 1px solid black;
-  margin: auto;
-}
-
-#gameCanvas {
-  margin: 0 auto 0;
-}
-
-#wordIpt {
-  height: 30px;
-  width: 100%;
-  background-color: transparent;
-  border-color: transparent;
-  border-bottom: 2px solid black;
-}
-
-#sendBtn {
-  background-color: rgba(255, 255, 255, 1);
-  border-color: transparent;
-  border-radius: 5px;
-  padding: 5px 20px;
-  margin-left: 10px;
-}
-
-#sendBtn:active {
-  background-color: rgba(255, 255, 255, 0.5);
-  border-color: transparent;
-  border-radius: 5px;
-  padding: 5px 20px;
-  margin-left: 10px;
-}
-
-#sendBtn:hover {
-  transition: 2ms;
-  border-color: black;
-}
-
-#timer {
-  width: max-content;
-  font-weight: bolder;
-  margin-left: 30px;
-}
-
-#imgClock {
-  width: 40px;
-  margin-left: 10px;
-}
-
-[data-animate="clock"].animate {
-  animation-name: shake;
-  animation-duration: 0.5s;
-  animation-timing-function: ease;
-  animation-iteration-count: 10;
-}
-
-@keyframes shake {
-  0% {
-    transform: rotate3d(0, 0, 1, -20deg);
-  }
-  25% {
-    transform: rotate3d(0, 0, 1, 20deg);
-  }
-  50% {
-    transform: rotate3d(0, 0, 1, -20deg);
-  }
-  75% {
-    transform: rotate3d(0, 0, 1, 20deg);
-  }
-  100% {
-    transform: rotate3d(0, 0, 1, -20deg);
-  }
-}
-
-.controls {
-  height: auto;
-  display: none;
-  align-items: center;
-  background: #ddd;
-  padding: 10px;
-}
-
-.controls .color {
-  margin: 0px 10px;
-}
-
-.controls .actions {
-  flex: 1;
-  text-align: right;
-}
-
-.controls .actions button {
-  padding: 5px 10px;
-  cursor: pointer;
-}
-
-/* New drawing tools styles */
-.tools-container {
-  display: flex;
-  flex-wrap: wrap;
-  width: 100%;
-  gap: 10px;
-}
-
-.tool-group {
-  display: flex;
-  align-items: center;
-  gap: 5px;
-  padding: 5px;
-  border: 1px dashed #8f00ff;
-  border-radius: 5px;
-}
-
-.color-picker {
-  display: flex;
-  align-items: center;
-  gap: 5px;
-}
-
-.color-palette {
-  display: flex;
-  gap: 3px;
-}
-
-.color-swatch {
-  width: 20px;
-  height: 20px;
-  border: 1px solid #000;
-  border-radius: 3px;
-  cursor: pointer;
-  transition: transform 0.1s;
-}
-
-/* Add styles for the copycat mode UI elements */
-.round-info,
-.copycat-info {
-  font-size: 16px;
-  margin: 5px 0;
-  padding: 5px;
-  background-color: #f0f0f0;
-  border: 1px solid #ccc;
-  border-radius: 5px;
-}
-
-.copycat-info {
-  color: #8f00ff;
-  font-weight: bold;
-}
-
-/* Add styles for game mode display */
-.game-info {
-  margin-top: 20px;
-  text-align: center;
-}
-
-.game-mode-display {
-  font-size: 18px;
-  font-weight: bold;
-  color: #8f00ff;
-  padding: 5px 10px;
-  background-color: #f0f0f0;
-  border: 2px solid #000;
-  border-radius: 5px;
-  display: inline-block;
-  transform: rotate(-1deg);
-  box-shadow: 2px 2px 0px #000;
-}
 
 /* Reference drawing preview for copycat mode */
 .reference-drawing-container {
@@ -597,4 +323,159 @@ canvas {
   font-size: 24px;
   font-weight: bold;
   padding: 5px 10px;
+}
+
+.server-log-notification {
+  position: fixed;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: rgba(0, 0, 0, 0.7);
+  color: white;
+  padding: 10px 20px;
+  border-radius: 5px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+  z-index: 1000;
+  animation: fadeIn 0.3s, fadeOut 0.3s 2.7s;
+  max-width: 80%;
+  text-align: center;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translate(-50%, 20px);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, 0);
+  }
+}
+
+@keyframes fadeOut {
+  from {
+    opacity: 1;
+    transform: translate(-50%, 0);
+  }
+  to {
+    opacity: 0;
+    transform: translate(-50%, 20px);
+  }
+}
+
+/* Album/Review System Styles */
+.album-review-container {
+  width: 800px;
+  margin: 0 auto;
+  background-color: white;
+  border: 2px solid black;
+  border-radius: 10px;
+  padding: 20px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.album-header {
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.album-header h2 {
+  color: #8f00ff;
+  margin-bottom: 5px;
+}
+
+.album-navigation {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-bottom: 15px;
+}
+
+.album-nav-btn {
+  background-color: #8f00ff;
+  color: white;
+  border: none;
+  padding: 8px 15px;
+  margin: 0 10px;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 16px;
+}
+
+.album-nav-btn:hover {
+  background-color: #7700cc;
+}
+
+#drawingCounter {
+  font-size: 18px;
+  font-weight: bold;
+}
+
+.album-display {
+  margin-bottom: 20px;
+}
+
+.drawing-info {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 10px;
+  padding: 10px;
+  background-color: #f0f0f0;
+  border-radius: 5px;
+}
+
+#drawerName {
+  font-size: 18px;
+  font-weight: bold;
+}
+
+.rating-container {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.star-rating {
+  display: flex;
+}
+
+.star {
+  font-size: 24px;
+  color: #ccc;
+  cursor: pointer;
+  transition: color 0.2s;
+}
+
+.star:hover,
+.star.active {
+  color: #ffdd00;
+}
+
+.album-actions {
+  text-align: center;
+  margin-top: 20px;
+}
+
+.continue-btn {
+  background-color: #adff02;
+  color: black;
+  border: 2px solid black;
+  padding: 10px 20px;
+  font-size: 18px;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.continue-btn:hover {
+  background-color: #8f00ff;
+  color: white;
+}
+
+/* Add this to ensure the album canvas has the right background */
+#albumCanvas {
+  background-color: white;
+  border: 1px solid #ccc;
+  display: block;
+  margin: 0 auto;
 }

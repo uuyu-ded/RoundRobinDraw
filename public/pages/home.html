@@ -8,52 +8,56 @@
   <link rel="stylesheet" href="../styles/modal.css" />
   <link rel="stylesheet" href="../styles/sketchy-theme.css" />
   <link rel="icon" href="../img/game/icon.png" type="image/png">
-  <title>Draw.it</title>
+  <title>RoundRobinDraw</title>
 </head>
 
 <body>
   <div id="header">
     <div class="logo-container">
-      <img src="../img/game/icon.png" alt="Draw.it Logo" class="game-logo">
-      <h1>Draw.it</h1>
+      <img src="../img/game/icon.png" class="game-logo">
+      <h1>RoundRobin Draw</h1>
     </div>
   </div>
 
-  <!-- Tutorial Slideshow -->
+  <div class="options">
+    <!-- Tutorial Slideshow -->
   <div class="tutorial-container">
     <div class="tutorial-header">How to Play</div>
     <div class="slideshow">
       <div class="slide active">
         <div class="slide-content">
-          <h2>Welcome to Draw.it!</h2>
-          <p>Draw.it is a fun drawing and guessing game you can play with friends. Create a room or join an existing one to get started!</p>
-          <img src="../img/game/icon.png" alt="Draw.it Logo" class="slide-image">
+          <h2>Welcome to RoundRobin Draw!</h2>
+          <p>RoundRobin Draw is a fun drawing and guessing game you can play with friends. Create a room or join an existing one to get started!</p>
+          <img src="../img/game/Chiikawa1.png" alt="Welcome" class="slide-image">
         </div>
       </div>
-      <div class="slide">
-        <div class="slide-content">
-          <h2>Guessing Mode</h2>
-          <p>In Guessing Mode, one player draws a word while others try to guess it. The faster you guess, the more points you earn!</p>
-          <img src="../img/game/play.png" alt="Guessing Mode" class="slide-image">
-        </div>
-      </div>
-      <div class="slide">
-        <div class="slide-content">
-          <h2>Copycat Mode</h2>
-          <p>In Copycat Mode, everyone draws in the first round. Then in subsequent rounds, you'll try to copy someone else's drawing from memory!</p>
-          <img src="../img/game/play.png" alt="Copycat Mode" class="slide-image">
-        </div>
-      </div>
+      
       <div class="slide">
         <div class="slide-content">
           <h2>Creating a Room</h2>
           <p>Click "Create Room", choose your character, and enter a nickname. Share the room code with friends so they can join!</p>
+          <img src="../img/game/Chiikawa5.png" alt="Room" class="slide-image">
         </div>
       </div>
       <div class="slide">
         <div class="slide-content">
           <h2>Joining a Room</h2>
           <p>Click "Join Room", enter the room code, choose your character, and enter a nickname. Then click "Ready" when you're set to play!</p>
+          <img src="../img/game/Chiikawa2.png" alt="Join" class="slide-image">
+        </div>
+      </div>
+      <div class="slide">
+        <div class="slide-content">
+          <h2>Guessing Mode</h2>
+          <p>In Guessing Mode, one player draws a word while others try to guess it. The faster you guess, the more points you earn!</p>
+          <img src="../img/game/Chiikawa3.png" alt="Guessing Mode" class="slide-image">
+        </div>
+      </div>
+      <div class="slide">
+        <div class="slide-content">
+          <h2>Copycat Mode</h2>
+          <p>In Copycat Mode, everyone draws in the first round. Then in subsequent rounds, you'll try to copy someone else's drawing from memory!</p>
+          <img src="../img/game/Chiikawa6.png" alt="Copycat Mode" class="slide-image">
         </div>
       </div>
     </div>
@@ -69,8 +73,6 @@
       <button id="next-slide">Next</button>
     </div>
   </div>
-
-  <div class="options">
     <div class="roomOptions">
       <button class="roomBtn" id="createBtn">Create Room</button>
       <button class="roomBtn" id="joinBtn">Join Room</button>

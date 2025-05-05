@@ -41,14 +41,15 @@
   }
   
   .modal-footer {
-    padding: 2px 16px;
+    padding: 5px 5px;
+    margin-left: 100px;
   }
   
   .modal-content {
     color: white;
     font-size: 24px;
     top: 25vh;
-    position: static;
+    position: relative;
     background-color: #8f00ff;
     margin: auto;
     padding: 0;

@@ -84,6 +84,36 @@
           </div>
         </div>
         <canvas class="gameCanvas" id="gameCanvas" width="800" height="600"></canvas>
+        <div id="albumReviewContainer" class="album-review-container" style="display: none;">
+          <div class="album-header">
+            <h2>Drawing Gallery</h2>
+            <p id="albumDescription">Review all drawings from this round</p>
+          </div>
+          <div class="album-navigation">
+            <button id="prevDrawing" class="album-nav-btn">&lt; Previous</button>
+            <span id="drawingCounter">1/0</span>
+            <button id="nextDrawing" class="album-nav-btn">Next &gt;</button>
+          </div>
+          <div class="album-display">
+            <canvas id="albumCanvas" width="800" height="600"></canvas>
+            <div class="drawing-info">
+              <p id="drawerName">Artist: </p>
+              <div class="rating-container">
+                <p>Rate this drawing:</p>
+                <div class="star-rating">
+                  <span class="star" data-rating="1">★</span>
+                  <span class="star" data-rating="2">★</span>
+                  <span class="star" data-rating="3">★</span>
+                  <span class="star" data-rating="4">★</span>
+                  <span class="star" data-rating="5">★</span>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="album-actions">
+            <button id="continueFromAlbum" class="continue-btn">Continue to Next Round</button>
+          </div>
+        </div>
         <div id="boxInputText">
           <div style="width: 80%;">
             <div id="boxChat"></div>

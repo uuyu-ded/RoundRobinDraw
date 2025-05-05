@@ -143,15 +143,61 @@ canvas {
   border-color: black;
 }
 
-#timer {
-  width: max-content;
-  font-weight: bolder;
-  margin-left: 30px;
+/* Timer and clock styles */
+.timer-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
 }
 
-#imgClock {
-  width: 40px;
-  margin-left: 10px;
+#timer {
+  font-size: 24px;
+  font-weight: bolder;
+  color: #8f00ff;
+}
+
+.clock-icon {
+  width: 32px;
+  height: 32px;
+  background-color: #8f00ff;
+  border-radius: 50%;
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border: 2px solid #000;
+}
+
+.clock-icon::before {
+  content: "";
+  position: absolute;
+  width: 2px;
+  height: 10px;
+  background-color: #fff;
+  transform-origin: bottom center;
+  transform: rotate(0deg);
+  animation: clockHand 60s linear infinite;
+}
+
+.clock-icon::after {
+  content: "";
+  position: absolute;
+  width: 2px;
+  height: 8px;
+  background-color: #fff;
+  transform-origin: bottom center;
+  transform: rotate(90deg);
+  animation: clockHand 3600s linear infinite;
+}
+
+@keyframes clockHand {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
 }
 
 [data-animate="clock"].animate {
@@ -184,7 +230,7 @@ canvas {
   display: none;
   align-items: center;
   background: #ddd;
-  padding: 10px;
+  padding: 15px;
 }
 
 .controls .color {
@@ -201,41 +247,97 @@ canvas {
   cursor: pointer;
 }
 
-/* New drawing tools styles */
+/* New drawing tools styles - INCREASED SIZE */
 .tools-container {
   display: flex;
   flex-wrap: wrap;
   width: 100%;
-  gap: 10px;
+  gap: 15px;
+  padding: 10px;
 }
 
 .tool-group {
   display: flex;
   align-items: center;
-  gap: 5px;
-  padding: 5px;
-  border: 1px dashed #8f00ff;
-  border-radius: 5px;
+  gap: 10px;
+  padding: 10px;
+  border: 2px dashed #8f00ff;
+  border-radius: 8px;
 }
 
 .color-picker {
   display: flex;
   align-items: center;
-  gap: 5px;
+  gap: 10px;
+}
+
+.color-picker label {
+  font-size: 18px;
+}
+
+#pen-color {
+  width: 50px;
+  height: 50px;
+  cursor: pointer;
 }
 
 .color-palette {
   display: flex;
-  gap: 3px;
+  gap: 8px;
+  flex-wrap: wrap;
+  max-width: 200px;
 }
 
 .color-swatch {
-  width: 20px;
-  height: 20px;
-  border: 1px solid #000;
-  border-radius: 3px;
+  width: 30px;
+  height: 30px;
+  border: 2px solid #000;
+  border-radius: 5px;
   cursor: pointer;
-  transition: transform 0.1s;
+  transition: transform 0.2s;
+}
+
+.color-swatch:hover {
+  transform: scale(1.2);
+}
+
+.color-swatch.selected {
+  box-shadow: 0 0 0 3px #8f00ff;
+}
+
+.tool-btn {
+  width: 45px;
+  height: 45px;
+  font-size: 22px;
+  border: 2px solid #000;
+  border-radius: 8px;
+  background-color: #fff;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.tool-btn:hover {
+  background-color: #f0f0f0;
+  transform: scale(1.1);
+}
+
+.tool-btn.active {
+  background-color: #8f00ff;
+  color: white;
+}
+
+#brush-size {
+  width: 150px;
+  height: 20px;
+}
+
+#size-display {
+  font-size: 16px;
+  min-width: 40px;
+  text-align: center;
 }
 
 /* Add styles for the copycat mode UI elements */
@@ -478,4 +580,195 @@ canvas {
   border: 1px solid #ccc;
   display: block;
   margin: 0 auto;
+}
+
+/* Comments Section Styles */
+.comments-section {
+  margin-top: 20px;
+  border-top: 2px dashed #8f00ff;
+  padding-top: 15px;
+}
+
+.comments-section h3 {
+  color: #8f00ff;
+  margin-bottom: 10px;
+  text-align: center;
+}
+
+.comments-container {
+  max-height: 200px;
+  overflow-y: auto;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  padding: 10px;
+  margin-bottom: 15px;
+  background-color: #f9f9f9;
+}
+
+.comment {
+  margin-bottom: 10px;
+  padding: 8px;
+  border-radius: 5px;
+  background-color: #fff;
+  border-left: 3px solid #8f00ff;
+}
+
+.comment-header {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 5px;
+  font-size: 14px;
+}
+
+.comment-author {
+  font-weight: bold;
+  color: #8f00ff;
+}
+
+.comment-time {
+  color: #888;
+  font-size: 12px;
+}
+
+.comment-text {
+  font-size: 14px;
+  line-height: 1.4;
+}
+
+.comment-form {
+  display: flex;
+  gap: 10px;
+}
+
+#comment-input {
+  flex: 1;
+  padding: 8px;
+  border: 2px solid #ddd;
+  border-radius: 5px;
+  resize: none;
+  height: 60px;
+  font-family: inherit;
+}
+
+#comment-input:focus {
+  border-color: #8f00ff;
+  outline: none;
+}
+
+.comment-btn {
+  background-color: #8f00ff;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  padding: 0 15px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.comment-btn:hover {
+  background-color: #7700cc;
+}
+
+.no-comments {
+  text-align: center;
+  color: #888;
+  font-style: italic;
+  padding: 20px 0;
+}
+
+/* Timer container with clock */
+.timer-wrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+}
+
+#timer {
+  font-size: 24px;
+  font-weight: bold;
+  color: #333;
+}
+
+.clock-container {
+  position: relative;
+  width: 40px;
+  height: 40px;
+}
+
+.clock-face {
+  width: 100%;
+  height: 100%;
+  background-color: #fff;
+  border: 3px solid #333;
+  border-radius: 50%;
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.clock-center {
+  width: 6px;
+  height: 6px;
+  background-color: #333;
+  border-radius: 50%;
+  position: absolute;
+  z-index: 3;
+}
+
+.clock-hand {
+  position: absolute;
+  transform-origin: bottom center;
+  background-color: #333;
+  border-radius: 2px;
+}
+
+.hour-hand {
+  width: 3px;
+  height: 12px;
+  z-index: 2;
+  animation: rotate-hour 43200s linear infinite;
+}
+
+.minute-hand {
+  width: 2px;
+  height: 16px;
+  z-index: 1;
+  animation: rotate-minute 3600s linear infinite;
+}
+
+@keyframes rotate-hour {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes rotate-minute {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.clock-ticking {
+  animation: tick-tock 1s infinite;
+}
+
+@keyframes tick-tock {
+  0%,
+  100% {
+    transform: rotate(0deg);
+  }
+  25% {
+    transform: rotate(2deg);
+  }
+  75% {
+    transform: rotate(-2deg);
+  }
 }

@@ -90,7 +90,7 @@ const playerNick = urlParams.get("playerNick")
 
 let timerInterval
 
-const initialCont = 120
+const initialCont = 30
 let cont = initialCont
 
 const initialStartGameSeconds = 5
@@ -157,7 +157,8 @@ if (isGamePage) {
         p.appendChild(characterImg)
 
         const playerInfo = document.createElement("span")
-        const playerPoints = currentRoom.players[i].points || 0
+        // Ensure we're getting the points value, defaulting to 0 if undefined
+        const playerPoints = currentRoom.players[i].points !== undefined ? currentRoom.players[i].points : 0
         playerInfo.textContent = `${currentRoom.players[i].nickname} -  ${playerPoints}`
         playerInfo.id = `player-${currentRoom.players[i].nickname}`
         p.appendChild(playerInfo)
@@ -245,34 +246,33 @@ if (isGamePage) {
 
       if (currentRoom.copycatPhase === "drawing") {
         if (currentRoom.copycatRound === 0) {
-          gameHeader.innerHTML = "Draw anything you want!";
-          copycatInfo.textContent = "Draw anything! This will be used in later rounds.";
+          gameHeader.innerHTML = "Draw anything you want!"
+          copycatInfo.textContent = "Draw anything! This will be used in later rounds."
         } else {
-          gameHeader.innerHTML = "Now draw from memory!";
-          copycatInfo.textContent = `Draw ${sourcePlayerNickname}'s drawing from memory!`;
+          gameHeader.innerHTML = "Now draw from memory!"
+          copycatInfo.textContent = `Draw ${sourcePlayerNickname}'s drawing from memory!`
         }
-        
-        isDrawer = true;
-        isCopying = currentRoom.copycatRound > 0;
-        isViewingReference = false;
-        canDraw = true;
-        wordIpt.style.display = "none";
-        sendBtn.style.display = "none";
-        showToolBar();
-      } 
-      else if (currentRoom.copycatPhase === "viewing") {
-        gameHeader.innerHTML = `Memorize this drawing! (${currentRoom.viewingTimeRemaining}s)`;
-        copycatInfo.textContent = `Memorize ${sourcePlayerNickname}'s drawing!`;
-        
-        isDrawer = false;
-        isCopying = false;
-        isViewingReference = true;
-        canDraw = false;
-        wordIpt.style.display = "none";
-        sendBtn.style.display = "none";
-        hideToolBar();
-        
-        referenceContainer.style.display = "block";
+
+        isDrawer = true
+        isCopying = currentRoom.copycatRound > 0
+        isViewingReference = false
+        canDraw = true
+        wordIpt.style.display = "none"
+        sendBtn.style.display = "none"
+        showToolBar()
+      } else if (currentRoom.copycatPhase === "viewing") {
+        gameHeader.innerHTML = `Memorize this drawing! (${currentRoom.viewingTimeRemaining}s)`
+        copycatInfo.textContent = `Memorize ${sourcePlayerNickname}'s drawing!`
+
+        isDrawer = false
+        isCopying = false
+        isViewingReference = true
+        canDraw = false
+        wordIpt.style.display = "none"
+        sendBtn.style.display = "none"
+        hideToolBar()
+
+        referenceContainer.style.display = "block"
       }
     }
   }
@@ -329,7 +329,7 @@ if (isGamePage) {
     wordIpt.value = ""
     wordIpt.style.color = "red"
     setTimeout(() => {
-      wordIpt.style.color = "" 
+      wordIpt.style.color = ""
     }, 1000)
   }
 
@@ -511,7 +511,6 @@ if (isGamePage) {
     if (!currentRoom || currentRoom.gameMode !== "copycat" || (currentRoom.gameMode === "guess" && isDrawer)) {
       socket.emit("fillAction", { startX, startY, fillColor, roomCode }, player)
     }
-  
   }
 
   // Get color at specific pixel (color dropper tool)
@@ -558,7 +557,10 @@ if (isGamePage) {
     context.stroke()
     context.closePath()
 
-    if (emit && (!currentRoom || currentRoom.gameMode !== "copycat" || (currentRoom.gameMode === "guess" && isDrawer))) {
+    if (
+      emit &&
+      (!currentRoom || currentRoom.gameMode !== "copycat" || (currentRoom.gameMode === "guess" && isDrawer))
+    ) {
       socket.emit(
         "gameDrawing",
         {
@@ -579,224 +581,224 @@ if (isGamePage) {
     const text = wordIpt.value
     if (text) {
       const normalizedGuess = text.toLowerCase().trim()
-    const normalizedWord = currentRoom.word.toLowerCase().trim()
-    if (normalizedGuess === normalizedWord) {
-      socket.emit("guessWord", player, text)
-    } else {
-      // Optional: Provide feedback that the guess was wrong
-      guessedWrong()
-    }
-  }
-    }
-  }
-
-  function onResetBtnClick() {
-    socket.emit("clearBoard", player)
-
-    // Save the cleared state for undo/redo
-    if (isDrawer || isCopying) {
-      saveCanvasState()
-    }
-  }
-
-  function changeColor(event) {
-    if (currentTool !== "eraser") {
-      currentPos.color = event.target.value
-      lastColor = event.target.value
-
-      // Update selected swatch
-      updateSelectedSwatch(event.target.value)
-    }
-  }
-
-  function updateSelectedSwatch(color) {
-    colorSwatches.forEach((swatch) => {
-      if (swatch.dataset.color === color) {
-        swatch.classList.add("selected")
+      const normalizedWord = currentRoom.word.toLowerCase().trim()
+      if (normalizedGuess === normalizedWord) {
+        socket.emit("guessWord", player, text)
       } else {
-        swatch.classList.remove("selected")
+        // Optional: Provide feedback that the guess was wrong
+        guessedWrong()
       }
-    })
-  }
-
-  function selectColor() {
-    const penColor = document.querySelector("#pen-color")
-    penColor.value = currentPos.color
-    penColor.addEventListener("input", changeColor, false)
-  }
-
-  function changeBrushSize() {
-    currentPos.size = brushSize.value
-    targetPos.size = brushSize.value
-    sizeDisplay.textContent = `${brushSize.value}px`
-  }
-
-  function onMouseDown(e) {
-    if (!canDraw) return
-
-    drawing = true
-    selectColor()
-    relMouseCoords(e, currentPos)
-
-    // Handle different tools
-    if (currentTool === "bucket") {
-      floodFill(Math.floor(currentPos.x), Math.floor(currentPos.y), currentPos.color)
-    } else if (currentTool === "dropper") {
-      const color = getColorAtPixel(Math.floor(currentPos.x), Math.floor(currentPos.y))
-      currentPos.color = color
-      lastColor = color
-      const penColor = document.querySelector("#pen-color")
-      penColor.value = color
-      updateSelectedSwatch(color)
-
-      // Switch back to pencil after picking a color
-      setActiveTool("pencil")
     }
   }
+}
 
-  function onMouseUp(e) {
-    if (!canDraw || !drawing) return
+function onResetBtnClick() {
+  socket.emit("clearBoard", player)
 
-    drawing = false
-
-    if (currentTool === "pencil" || currentTool === "eraser") {
-      relMouseCoords(e, targetPos)
-      drawLine(
-        currentPos.x,
-        currentPos.y,
-        targetPos.x,
-        targetPos.y,
-        currentPos.color,
-        currentPos.size,
-        currentTool,
-        true,
-      )
-
-      // Save state for undo/redo after completing a stroke
-      saveCanvasState()
-    }
-  }
-
-  function onMouseMove(e) {
-    if (!canDraw || !drawing) return
-
-    if (currentTool === "pencil" || currentTool === "eraser") {
-      relMouseCoords(e, targetPos)
-      drawLine(
-        currentPos.x,
-        currentPos.y,
-        targetPos.x,
-        targetPos.y,
-        currentPos.color,
-        currentPos.size,
-        currentTool,
-        true,
-      )
-      relMouseCoords(e, currentPos)
-    }
-  }
-
-  function setActiveTool(tool) {
-    currentTool = tool
-
-    // Update UI
-    const toolButtons = document.querySelectorAll(".tool-btn")
-    toolButtons.forEach((btn) => {
-      btn.classList.remove("active")
-    })
-
-    document.getElementById(`${tool}-tool`).classList.add("active")
-
-    // Handle special tool behaviors
-    if (tool === "eraser") {
-      gameCanvas.style.cursor = "url('../img/game/eraser-cursor.png'), auto"
-    } else if (tool === "bucket") {
-      gameCanvas.style.cursor = "url('../img/game/bucket-cursor.png'), auto"
-    } else if (tool === "dropper") {
-      gameCanvas.style.cursor = "url('../img/game/dropper-cursor.png'), auto"
-    } else {
-      gameCanvas.style.cursor = "crosshair"
-    }
-  }
-
-  function guessEnter(e) {
-    if (e.key === "Enter") {
-      onSubmitBtnClick()
-    }
-  }
-
-  function onPlayersChanged(data) {
-    currentRoom = data
-    updatePlayerList()
-  }
-
-  function onJoinComplete(data) {
-    currentRoom = data
-    player = currentRoom.mostRecentPlayer
-    roomCodeHeader.innerHTML = `Room ${currentRoom.roomCode}`
-    updatePlayerList()
-    getDrawer()
-
-    // Initialize drawing history
+  // Save the cleared state for undo/redo
+  if (isDrawer || isCopying) {
     saveCanvasState()
   }
+}
 
-  function onJoinFailed() {
-    gameHeader.innerHTML = "Room not found!"
-    setTimeout(() => {
-      window.location.href = "/"
-    }, 2000)
+function changeColor(event) {
+  if (currentTool !== "eraser") {
+    currentPos.color = event.target.value
+    lastColor = event.target.value
+
+    // Update selected swatch
+    updateSelectedSwatch(event.target.value)
   }
+}
 
-  function onJoinFailedMaxPlayers() {
-    gameHeader.innerHTML = "Room is full!"
-    setTimeout(() => {
-      window.location.href = "/"
-    }, 2000)
-  }
-
-  function onDrawingEvent(data) {
-    if (!currentRoom || currentRoom.gameMode !== "copycat" || isViewingReference) {
-      drawLine(data.x0, data.y0, data.x1, data.y1, data.color, data.size, data.tool, false)
+function updateSelectedSwatch(color) {
+  colorSwatches.forEach((swatch) => {
+    if (swatch.dataset.color === color) {
+      swatch.classList.add("selected")
+    } else {
+      swatch.classList.remove("selected")
     }
-  }
+  })
+}
 
-  function onFillAction(data) {
-    if (!currentRoom || currentRoom.gameMode !== "copycat" || isViewingReference) {
-      floodFill(data.startX, data.startY, data.fillColor)
-    }
-  }
+function selectColor() {
+  const penColor = document.querySelector("#pen-color")
+  penColor.value = currentPos.color
+  penColor.addEventListener("input", changeColor, false)
+}
 
-  function onCanvasState(data) {
-    const img = new Image()
-    img.crossOrigin = "anonymous"
-    img.onload = () => {
-      context.clearRect(0, 0, gameCanvas.width, gameCanvas.height)
-      context.drawImage(img, 0, 0)
-    }
-    img.src = data.imageData
-  }function onCanvasState(data) {
-    if (!currentRoom || currentRoom.gameMode !== "copycat" || isViewingReference) {
-      const img = new Image()
-      img.crossOrigin = "anonymous"
-      img.onload = () => {
-        context.clearRect(0, 0, gameCanvas.width, gameCanvas.height)
-        context.drawImage(img, 0, 0)
+function changeBrushSize() {
+  currentPos.size = brushSize.value
+  targetPos.size = brushSize.value
+  sizeDisplay.textContent = `${brushSize.value}px`
+}
+
+function onMouseDown(e) {
+  if (!canDraw) return
+
+  drawing = true
+  selectColor()
+  relMouseCoords(e, currentPos)
+
+  // Handle different tools
+  if (currentTool === "bucket") {
+    floodFill(Math.floor(currentPos.x), Math.floor(currentPos.y), currentPos.color)
+  } else if (currentTool === "dropper") {
+    const color = getColorAtPixel(Math.floor(currentPos.x), Math.floor(currentPos.y))
+    currentPos.color = color
+    lastColor = color
+    const penColor = document.querySelector("#pen-color")
+    penColor.value = color
+    updateSelectedSwatch(color)
+
+    // Switch back to pencil after picking a color
+    setActiveTool("pencil")
+  }
+}
+
+function onMouseUp(e) {
+  if (!canDraw || !drawing) return
+
+  drawing = false
+
+  if (currentTool === "pencil" || currentTool === "eraser") {
+    relMouseCoords(e, targetPos)
+    drawLine(currentPos.x, currentPos.y, targetPos.x, targetPos.y, currentPos.color, currentPos.size, currentTool, true)
+
+    // Save state for undo/redo after completing a stroke
+    saveCanvasState()
+  }
+}
+
+function onMouseMove(e) {
+  if (!canDraw || !drawing) return
+
+  if (currentTool === "pencil" || currentTool === "eraser") {
+    relMouseCoords(e, targetPos)
+    drawLine(currentPos.x, currentPos.y, targetPos.x, targetPos.y, currentPos.color, currentPos.size, currentTool, true)
+    relMouseCoords(e, currentPos)
+  }
+}
+
+function setActiveTool(tool) {
+  currentTool = tool
+
+  // Update UI
+  const toolButtons = document.querySelectorAll(".tool-btn")
+  toolButtons.forEach((btn) => {
+    btn.classList.remove("active")
+  })
+
+  document.getElementById(`${tool}-tool`).classList.add("active")
+
+  // Handle special tool behaviors
+  if (tool === "eraser") {
+    gameCanvas.style.cursor = "url('../img/game/eraser-cursor.png'), auto"
+  } else if (tool === "bucket") {
+    gameCanvas.style.cursor = "url('../img/game/bucket-cursor.png'), auto"
+  } else if (tool === "dropper") {
+    gameCanvas.style.cursor = "url('../img/game/dropper-cursor.png'), auto"
+  } else {
+    gameCanvas.style.cursor = "crosshair"
+  }
+}
+
+function guessEnter(e) {
+  if (e.key === "Enter") {
+    onSubmitBtnClick()
+  }
+}
+
+function onPlayersChanged(data) {
+  currentRoom = data
+  updatePlayerList()
+}
+
+function onJoinComplete(data) {
+  currentRoom = data
+  player = currentRoom.mostRecentPlayer
+  roomCodeHeader.innerHTML = `Room ${currentRoom.roomCode}`
+  updatePlayerList()
+  getDrawer()
+
+  // Initialize drawing history
+  saveCanvasState()
+}
+
+function onJoinFailed() {
+  gameHeader.innerHTML = "Room not found!"
+  setTimeout(() => {
+    window.location.href = "/"
+  }, 2000)
+}
+
+function onJoinFailedMaxPlayers() {
+  gameHeader.innerHTML = "Room is full!"
+  setTimeout(() => {
+    window.location.href = "/"
+  }, 2000)
+}
+
+function onDrawingEvent(data) {
+  if (!currentRoom || currentRoom.gameMode !== "copycat" || isViewingReference) {
+    drawLine(data.x0, data.y0, data.x1, data.y1, data.color, data.size, data.tool, false)
+  }
+}
+
+function onFillAction(data) {
+  if (!currentRoom || currentRoom.gameMode !== "copycat" || isViewingReference) {
+    floodFill(data.startX, data.startY, data.fillColor)
+  }
+}
+
+function onCanvasState(data) {
+  const img = new Image()
+  img.crossOrigin = "anonymous"
+  img.onload = () => {
+    context.clearRect(0, 0, gameCanvas.width, gameCanvas.height)
+    context.drawImage(img, 0, 0)
+  }
+  img.src = data.imageData
+}
+function onDrawingToCopy(data) {
+  if (currentRoom.gameMode === "copycat" && currentRoom.copycatRound > 0) {
+    // Store the reference drawing data
+    referenceDrawingData = data.drawingData
+    sourcePlayerNickname = data.sourcePlayer
+
+    // If we're in the viewing phase, show the reference drawing
+    if (currentRoom.copycatPhase === "viewing") {
+      // Show in the reference canvas
+      const refImg = new Image()
+      refImg.onload = () => {
+        if (referenceContext) {
+          referenceContext.clearRect(0, 0, referenceContext.canvas.width, referenceContext.canvas.height)
+          referenceContext.drawImage(refImg, 0, 0, referenceContext.canvas.width, referenceContext.canvas.height)
+        }
       }
-      img.src = data.imageData
+      refImg.src = referenceDrawingData
     }
   }
+}
 
-  function onDrawingToCopy(data) {
-    if (currentRoom.gameMode === "copycat" && currentRoom.copycatRound > 0) {
-      // Store the reference drawing data
-      referenceDrawingData = data.drawingData
-      sourcePlayerNickname = data.sourcePlayer
+function onCopycatPhaseChange(data) {
+  currentRoom = data.room
 
-      // If we're in the viewing phase, show the reference drawing
-      if (currentRoom.copycatPhase === "viewing") {
-        // Show in the reference canvas
+  if (currentRoom.gameMode === "copycat") {
+    if (currentRoom.copycatPhase === "viewing") {
+      // Show the reference drawing if we have it
+      if (referenceDrawingData) {
+        const img = new Image()
+        img.crossOrigin = "anonymous"
+        img.onload = () => {
+          context.clearRect(0, 0, gameCanvas.width, gameCanvas.height)
+          context.drawImage(img, 0, 0)
+        }
+        img.src = referenceDrawingData
+
+        // Also show in the reference canvas
         const refImg = new Image()
+        refImg.crossOrigin = "anonymous"
         refImg.onload = () => {
           if (referenceContext) {
             referenceContext.clearRect(0, 0, referenceContext.canvas.width, referenceContext.canvas.height)
@@ -805,415 +807,392 @@ if (isGamePage) {
         }
         refImg.src = referenceDrawingData
       }
-    }
-  }
-
-  function onCopycatPhaseChange(data) {
-    currentRoom = data.room
-
-    if (currentRoom.gameMode === "copycat") {
-      if (currentRoom.copycatPhase === "viewing") {
-        // Show the reference drawing if we have it
-        if (referenceDrawingData) {
-          const img = new Image()
-          img.crossOrigin = "anonymous"
-          img.onload = () => {
-            context.clearRect(0, 0, gameCanvas.width, gameCanvas.height)
-            context.drawImage(img, 0, 0)
-          }
-          img.src = referenceDrawingData
-
-          // Also show in the reference canvas
-          const refImg = new Image()
-          refImg.crossOrigin = "anonymous"
-          refImg.onload = () => {
-            if (referenceContext) {
-              referenceContext.clearRect(0, 0, referenceContext.canvas.width, referenceContext.canvas.height)
-              referenceContext.drawImage(refImg, 0, 0, referenceContext.canvas.width, referenceContext.canvas.height)
-            }
-          }
-          refImg.src = referenceDrawingData
-        }
-      } else if (currentRoom.copycatPhase === "drawing") {
-        // Clear the canvas for drawing
-        context.clearRect(0, 0, gameCanvas.width, gameCanvas.height)
-      }
-
-      // Update UI
-      getDrawer()
-    }
-  }
-
-  function onViewingTimeUpdate(data) {
-    if (currentRoom.gameMode === "copycat" && currentRoom.copycatPhase === "viewing") {
-      currentRoom.viewingTimeRemaining = data.timeRemaining
-      gameHeader.innerHTML = `Memorize this drawing! (${currentRoom.viewingTimeRemaining}s)`
-    }
-  }
-
-  function onClearBoard() {
-    context.clearRect(0, 0, gameCanvas.width, gameCanvas.height)
-
-    // If we're not the drawer, we should update our history
-    if (!isDrawer) {
-      saveCanvasState()
-    }function onCanvasState(data) {
-      if (!currentRoom || currentRoom.gameMode !== "copycat" || isViewingReference) {
-        const img = new Image()
-        img.crossOrigin = "anonymous"
-        img.onload = () => {
-          context.clearRect(0, 0, gameCanvas.width, gameCanvas.height)
-          context.drawImage(img, 0, 0)
-        }
-        img.src = data.imageData
-      }
-    }
-  }
-
-  // Add this function to handle the album review system
-  function showAlbumReview(drawings) {
-    // Hide the game canvas and show the album review
-    if (canvasDiv) canvasDiv.style.display = "none"
-    albumReviewContainer.style.display = "block"
-
-    // Store the drawings
-    albumDrawings = drawings
-    currentAlbumIndex = 0
-
-    // Initialize ratings object
-    ratings = {}
-
-    // Update the drawing counter
-    drawingCounter.textContent = `1/${albumDrawings.length}`
-
-    // Display the first drawing
-    if (albumDrawings.length > 0) {
-      displayDrawingInAlbum(0)
+    } else if (currentRoom.copycatPhase === "drawing") {
+      // Clear the canvas for drawing
+      context.clearRect(0, 0, gameCanvas.width, gameCanvas.height)
     }
 
-    // Reset star ratings
-    resetStarRatings()
-
-    // Set album mode flag
-    albumMode = true
+    // Update UI
+    getDrawer()
   }
+}
 
-  // Function to display a drawing in the album
-  function displayDrawingInAlbum(index) {
-    if (index < 0 || index >= albumDrawings.length) return
-
-    const drawing = albumDrawings[index]
-
-    // Clear the canvas
-    albumContext.clearRect(0, 0, albumCanvas.width, albumCanvas.height)
-
-    // Load and display the drawing
-    const img = new Image()
-    img.crossOrigin = "anonymous"
-    img.onload = () => {
-      albumContext.drawImage(img, 0, 0)
-    }
-    img.src = drawing.drawingData
-
-    // Update drawer name
-    drawerNameElement.textContent = `Artist: ${drawing.playerNickname}`
-
-    // Update drawing counter
-    drawingCounter.textContent = `${index + 1}/${albumDrawings.length}`
-
-    // Update star ratings to reflect any previous rating
-    updateStarRatingDisplay(drawing.playerNickname)
+function onViewingTimeUpdate(data) {
+  if (currentRoom.gameMode === "copycat" && currentRoom.copycatPhase === "viewing") {
+    currentRoom.viewingTimeRemaining = data.timeRemaining
+    gameHeader.innerHTML = `Memorize this drawing! (${currentRoom.viewingTimeRemaining}s)`
   }
+}
 
-  // Function to navigate to the previous drawing
-  function navigateToPrevDrawing() {
-    if (currentAlbumIndex > 0) {
-      currentAlbumIndex--
-      displayDrawingInAlbum(currentAlbumIndex)
-    }
-  }
+function onClearBoard() {
+  context.clearRect(0, 0, gameCanvas.width, gameCanvas.height)
 
-  // Function to navigate to the next drawing
-  function navigateToNextDrawing() {
-    if (currentAlbumIndex < albumDrawings.length - 1) {
-      currentAlbumIndex++
-      displayDrawingInAlbum(currentAlbumIndex)
-    }
-  }
-
-  // Function to reset all star ratings display
-  function resetStarRatings() {
-    starRating.forEach((star) => {
-      star.classList.remove("active")
-    })
-  }
-
-  // Function to update star rating display for a specific drawer
-  function updateStarRatingDisplay(drawerNickname) {
-    // Reset all stars first
-    resetStarRatings()
-
-    // If this drawing has been rated, show the rating
-    if (ratings[drawerNickname]) {
-      const rating = ratings[drawerNickname]
-      starRating.forEach((star) => {
-        if (Number.parseInt(star.dataset.rating) <= rating) {
-          star.classList.add("active")
-        }
-      })
-    }
-  }
-
-  // Function to rate a drawing
-  function rateDrawing(rating) {
-    if (currentAlbumIndex >= 0 && currentAlbumIndex < albumDrawings.length) {
-      const drawerNickname = albumDrawings[currentAlbumIndex].playerNickname
-      ratings[drawerNickname] = rating
-
-      // Update the display
-      updateStarRatingDisplay(drawerNickname)
-
-      // Send the rating to the server
-      socket.emit("rateDrawing", {
-        roomCode: currentRoom.roomCode,
-        drawerNickname: drawerNickname,
-        rating: rating,
-        raterNickname: player.nickname,
-      })
-
-      showServerLog(`You rated ${drawerNickname}'s drawing ${rating} stars`)
-    }
-  }
-
-  // Function to continue from album review
-  function continueFromAlbum() {
-    // Hide album review and show game canvas
-    albumReviewContainer.style.display = "none"
-    if (canvasDiv) canvasDiv.style.display = "block"
-
-    // Set album mode flag
-    albumMode = false
-
-    // Tell the server we're ready for the next round
-    socket.emit("playerReadyChanged", {
-      nickname: player.nickname,
-      roomCode: player.roomCode,
-      character: player.character,
-      ready: true,
-      socketId: socket.id,
-    })
-
-    showServerLog("Ready for next round")
-  }
-
-  function onNewGame(data) {
-    startGameSeconds = initialStartGameSeconds
-    const startGameTimer = setInterval(() => {
-      if (startGameSeconds === 0) {
-        clearInterval(startGameTimer)
-        cont = initialCont
-        currentRoom = data
-        context.clearRect(0, 0, gameCanvas.width, gameCanvas.height)
-
-        // Make sure album review is hidden and game canvas is shown
-        albumReviewContainer.style.display = "none"
-        if (canvasDiv) canvasDiv.style.display = "block"
-
-        getDrawer()
-        initTimer()
-
-        // Reset drawing history for new game
-        drawHistory = []
-        redoStack = []
-        currentStep = -1
-        saveCanvasState()
-      } else {
-        gameHeader.innerHTML = `New Game starting in ${startGameSeconds}`
-        if (wordIpt.value !== rightWordwas) {
-          rightWord.innerHTML = rightWordwas
-          rightWord.style.display = "block"
-          rightWord.style.color = "black"
-        }
-        rightWord.style.display = "block"
-        startGameSeconds--
-      }
-    }, 1000)
-  }
-
-  function onEndGame() {
-    gameHeader.innerHTML = "Game has been ended"
-    setTimeout(() => {
-      window.location.href = "/"
-    }, 2000)
-  }
-
-  function onGuessedRight(updatedRoom, playerRight, pointsEarned) {
-    currentRoom = updatedRoom
-
-    updatePlayerList()
-
-    if (player.nickname === playerRight.nickname) {
-      guessedRight()
-
-      const playerElement = document.getElementById(`player-${playerRight.nickname}`)
-      if (playerElement) {
-        playerElement.classList.add("points-animation")
-        setTimeout(() => {
-          playerElement.classList.remove("points-animation")
-        }, 800)
-
-        showPointsIndicator(pointsEarned, playerElement)
-      }
-    }
-
-    if (currentRoom.drawer) {
-      const drawerElement = document.getElementById(`player-${currentRoom.drawer.nickname}`)
-      if (drawerElement) {
-        drawerElement.classList.add("points-animation")
-        setTimeout(() => {
-          drawerElement.classList.remove("points-animation")
-        }, 800)
-
-        showPointsIndicator(1, drawerElement)
-      }
-    }
-  }
-
-  function onGuessedWrong(updatedRoom, playerWrong) {
-    if (player.nickname === playerWrong.nickname) {
-      guessedWrong()
-    }
-  }
-
-  function onWordWas(wordWas) {
-    rightWordwas = wordWas
-  }
-
-  function setupSocket() {
-    // io is expected to be defined globally by socket.io
-    socket = io()
-
-    socket.on("joinComplete", onJoinComplete)
-    socket.on("joinFailed", onJoinFailed)
-    socket.on("joinFailedMaxPlayers", onJoinFailedMaxPlayers)
-
-    socket.on("playersChanged", onPlayersChanged)
-    socket.on("playerDrawing", onDrawingEvent)
-    socket.on("fillAction", onFillAction)
-    socket.on("canvasState", onCanvasState)
-    socket.on("drawingToCopy", onDrawingToCopy)
-    socket.on("copycatPhaseChange", onCopycatPhaseChange)
-    socket.on("viewingTimeUpdate", onViewingTimeUpdate)
-    socket.on("drawingToCopy", onDrawingToCopy)
-
-    socket.on("newGame", onNewGame)
-    socket.on("endGame", onEndGame)
-
-    socket.on("guessedRight", onGuessedRight)
-    socket.on("guessedWrong", onGuessedWrong)
-    socket.on("wordWas", onWordWas)
-    socket.on("pointsUpdated", (updatedRoom) => {
-      currentRoom = updatedRoom
-      updatePlayerList()
-    })
-    socket.on("resetBoard", onClearBoard)
-
-    // Add this event listener in the setupSocket function
-    socket.on("serverLog", (message) => {
-      console.log(`[Server Log] ${message}`)
-      showServerLog(message)
-    })
-
-    // Add this to the socket event handlers section
-    socket.on("showAlbum", showAlbumReview)
-  }
-
-  function checkParameters() {
-    // Only redirect if we're on the game page and missing required parameters
-    if (isGamePage && (!playerId || !roomCode)) {
-      console.log("Missing required parameters, redirecting to home page")
-      window.location.href = "/"
-    }
-  }
-
-  function initializeClient() {
-    const gameOptions = { playerId, roomCode }
-    socket.emit("joinGame", gameOptions)
-  }
-
-  function setupToolListeners() {
-    // Tool selection
-    pencilTool?.addEventListener("click", () => setActiveTool("pencil"))
-    eraserTool?.addEventListener("click", () => setActiveTool("eraser"))
-    bucketTool?.addEventListener("click", () => setActiveTool("bucket"))
-    dropperTool?.addEventListener("click", () => setActiveTool("dropper"))
-
-    // Undo/Redo
-    undoBtn?.addEventListener("click", undoAction)
-    redoBtn?.addEventListener("click", redoAction)
-
-    // Brush size
-    brushSize?.addEventListener("input", changeBrushSize)
-
-    // Color swatches
-    colorSwatches.forEach((swatch) => {
-      swatch.addEventListener("click", () => {
-        const color = swatch.dataset.color
-        currentPos.color = color
-        lastColor = color
-        const penColor = document.querySelector("#pen-color")
-        penColor.value = color
-        updateSelectedSwatch(color)
-      })
-    })
-  }
-
-  // Declare io before using it
-  const io = window.io
-
-  // Initialize the game
-  setupSocket()
-  checkParameters()
-  initializeClient()
-  initTimer()
-  setupToolListeners()
-
-  // Set initial brush size
-  changeBrushSize()
-
-  // Set initial tool
-  setActiveTool("pencil")
-
-  // Save initial canvas state
-  setTimeout(() => {
+  // If we're not the drawer, we should update our history
+  if (!isDrawer) {
     saveCanvasState()
-  }, 500)
+  }
+}
 
-  // Add event listeners
-  resetCanvaBtn?.addEventListener("click", onResetBtnClick)
-  sendBtn?.addEventListener("click", onSubmitBtnClick)
-  wordIpt?.addEventListener("keydown", guessEnter)
+// Add this function to handle the album review system
+function showAlbumReview(drawings) {
+  // Hide the game canvas and show the album review
+  if (canvasDiv) canvasDiv.style.display = "none"
+  albumReviewContainer.style.display = "block"
 
-  gameCanvas?.addEventListener("mousedown", onMouseDown, false)
-  gameCanvas?.addEventListener("mouseup", onMouseUp, false)
-  gameCanvas?.addEventListener("mouseout", onMouseUp, false)
-  gameCanvas?.addEventListener("mousemove", throttle(onMouseMove, 10), false)
+  // Store the drawings
+  albumDrawings = drawings
+  currentAlbumIndex = 0
 
-  gameCanvas?.addEventListener("touchstart", onMouseDown, false)
-  gameCanvas?.addEventListener("touchend", onMouseUp, false)
-  gameCanvas?.addEventListener("touchcancel", onMouseUp, false)
-  gameCanvas?.addEventListener("touchmove", throttle(onMouseMove, 10), false)
+  // Initialize ratings object
+  ratings = {}
 
-  // Add these event listeners at the end of the file where other event listeners are added
-  prevDrawingBtn?.addEventListener("click", navigateToPrevDrawing)
-  nextDrawingBtn?.addEventListener("click", navigateToNextDrawing)
-  continueFromAlbumBtn?.addEventListener("click", continueFromAlbum)
+  // Update the drawing counter
+  drawingCounter.textContent = `1/${albumDrawings.length}`
 
-  // Add event listeners for star ratings
+  // Display the first drawing
+  if (albumDrawings.length > 0) {
+    displayDrawingInAlbum(0)
+  }
+
+  // Reset star ratings
+  resetStarRatings()
+
+  // Set album mode flag
+  albumMode = true
+}
+
+// Function to display a drawing in the album
+function displayDrawingInAlbum(index) {
+  if (index < 0 || index >= albumDrawings.length) return
+
+  const drawing = albumDrawings[index]
+
+  // Clear the canvas
+  albumContext.clearRect(0, 0, albumCanvas.width, albumCanvas.height)
+
+  // Load and display the drawing
+  const img = new Image()
+  img.crossOrigin = "anonymous"
+  img.onload = () => {
+    albumContext.drawImage(img, 0, 0)
+  }
+  img.src = drawing.drawingData
+
+  // Update drawer name
+  drawerNameElement.textContent = `Artist: ${drawing.playerNickname}`
+
+  // Update drawing counter
+  drawingCounter.textContent = `${index + 1}/${albumDrawings.length}`
+
+  // Update star ratings to reflect any previous rating
+  updateStarRatingDisplay(drawing.playerNickname)
+}
+
+// Function to navigate to the previous drawing
+function navigateToPrevDrawing() {
+  if (currentAlbumIndex > 0) {
+    currentAlbumIndex--
+    displayDrawingInAlbum(currentAlbumIndex)
+  }
+}
+
+// Function to navigate to the next drawing
+function navigateToNextDrawing() {
+  if (currentAlbumIndex < albumDrawings.length - 1) {
+    currentAlbumIndex++
+    displayDrawingInAlbum(currentAlbumIndex)
+  }
+}
+
+// Function to reset all star ratings display
+function resetStarRatings() {
   starRating.forEach((star) => {
-    star.addEventListener("click", function () {
-      const rating = Number.parseInt(this.dataset.rating)
-      rateDrawing(rating)
+    star.classList.remove("active")
+  })
+}
+
+// Function to update star rating display for a specific drawer
+function updateStarRatingDisplay(drawerNickname) {
+  // Reset all stars first
+  resetStarRatings()
+
+  // If this drawing has been rated, show the rating
+  if (ratings[drawerNickname]) {
+    const rating = ratings[drawerNickname]
+    starRating.forEach((star) => {
+      if (Number.parseInt(star.dataset.rating) <= rating) {
+        star.classList.add("active")
+      }
     })
+  }
+}
+
+// Function to rate a drawing
+function rateDrawing(rating) {
+  if (currentAlbumIndex >= 0 && currentAlbumIndex < albumDrawings.length) {
+    const drawerNickname = albumDrawings[currentAlbumIndex].playerNickname
+    ratings[drawerNickname] = rating
+
+    // Update the display
+    updateStarRatingDisplay(drawerNickname)
+
+    // Send the rating to the server
+    socket.emit("rateDrawing", {
+      roomCode: currentRoom.roomCode,
+      drawerNickname: drawerNickname,
+      rating: rating,
+      raterNickname: player.nickname,
+    })
+
+    showServerLog(`You rated ${drawerNickname}'s drawing ${rating} stars`)
+  }
+}
+
+// Function to continue from album review
+function continueFromAlbum() {
+  // Hide album review and show game canvas
+  albumReviewContainer.style.display = "none"
+  if (canvasDiv) canvasDiv.style.display = "block"
+
+  // Set album mode flag
+  albumMode = false
+
+  // Tell the server we're ready for the next round
+  socket.emit("playerReadyChanged", {
+    nickname: player.nickname,
+    roomCode: player.roomCode,
+    character: player.character,
+    ready: true,
+    socketId: socket.id,
   })
 
+  showServerLog("Ready for next round")
+}
+
+// Fix the onNewGame function to properly reset and display the new word
+function onNewGame(data) {
+  startGameSeconds = initialStartGameSeconds
+  const startGameTimer = setInterval(() => {
+    if (startGameSeconds === 0) {
+      clearInterval(startGameTimer)
+      cont = initialCont
+      currentRoom = data
+      context.clearRect(0, 0, gameCanvas.width, gameCanvas.height)
+
+      // Make sure album review is hidden and game canvas is shown
+      albumReviewContainer.style.display = "none"
+      if (canvasDiv) canvasDiv.style.display = "block"
+
+      // Reset drawing history for new game
+      drawHistory = []
+      redoStack = []
+      currentStep = -1
+      saveCanvasState()
+
+      // Reset player's guessing state
+      player.alreadyPointed = false
+
+      // Reset the word input and right word display
+      wordIpt.value = ""
+      rightWord.innerHTML = ""
+      rightWord.style.display = "none"
+
+      getDrawer()
+      initTimer()
+    } else {
+      gameHeader.innerHTML = `New Game starting in ${startGameSeconds}`
+      if (wordIpt.value !== rightWordwas) {
+        rightWord.innerHTML = rightWordwas
+        rightWord.style.display = "block"
+        rightWord.style.color = "black"
+      }
+      rightWord.style.display = "block"
+      startGameSeconds--
+    }
+  }, 1000)
+}
+
+function onEndGame() {
+  gameHeader.innerHTML = "Game has been ended"
+  setTimeout(() => {
+    window.location.href = "/"
+  }, 2000)
+}
+
+function onGuessedRight(updatedRoom, playerRight, pointsEarned) {
+  currentRoom = updatedRoom
+
+  // Make sure we update the player list with the new points
+  updatePlayerList()
+
+  if (player.nickname === playerRight.nickname) {
+    guessedRight()
+
+    const playerElement = document.getElementById(`player-${playerRight.nickname}`)
+    if (playerElement) {
+      playerElement.classList.add("points-animation")
+      setTimeout(() => {
+        playerElement.classList.remove("points-animation")
+      }, 800)
+
+      showPointsIndicator(pointsEarned, playerElement)
+    }
+  }
+
+  if (currentRoom.drawer && currentRoom.drawer.nickname) {
+    const drawerElement = document.getElementById(`player-${currentRoom.drawer.nickname}`)
+    if (drawerElement) {
+      drawerElement.classList.add("points-animation")
+      setTimeout(() => {
+        drawerElement.classList.remove("points-animation")
+      }, 800)
+
+      showPointsIndicator(1, drawerElement)
+    }
+  }
+}
+
+function onGuessedWrong(updatedRoom, playerWrong) {
+  if (player.nickname === playerWrong.nickname) {
+    guessedWrong()
+  }
+}
+
+function onWordWas(wordWas) {
+  rightWordwas = wordWas
+}
+
+function setupSocket() {
+  // io is expected to be defined globally by socket.io
+  socket = io()
+
+  socket.on("joinComplete", onJoinComplete)
+  socket.on("joinFailed", onJoinFailed)
+  socket.on("joinFailedMaxPlayers", onJoinFailedMaxPlayers)
+
+  socket.on("playersChanged", onPlayersChanged)
+  socket.on("playerDrawing", onDrawingEvent)
+  socket.on("fillAction", onFillAction)
+  socket.on("canvasState", onCanvasState)
+  socket.on("drawingToCopy", onDrawingToCopy)
+  socket.on("copycatPhaseChange", onCopycatPhaseChange)
+  socket.on("viewingTimeUpdate", onViewingTimeUpdate)
+  socket.on("drawingToCopy", onDrawingToCopy)
+
+  socket.on("newGame", onNewGame)
+  socket.on("endGame", onEndGame)
+
+  socket.on("guessedRight", onGuessedRight)
+  socket.on("guessedWrong", onGuessedWrong)
+  socket.on("wordWas", onWordWas)
+  socket.on("pointsUpdated", (updatedRoom) => {
+    currentRoom = updatedRoom
+    updatePlayerList()
+  })
+  socket.on("resetBoard", onClearBoard)
+
+  // Add this event listener in the setupSocket function
+  socket.on("serverLog", (message) => {
+    console.log(`[Server Log] ${message}`)
+    showServerLog(message)
+  })
+
+  // Add this to the socket event handlers section
+  socket.on("showAlbum", showAlbumReview)
+}
+
+function checkParameters() {
+  // Only redirect if we're on the game page and missing required parameters
+  if (isGamePage && (!playerId || !roomCode)) {
+    console.log("Missing required parameters, redirecting to home page")
+    window.location.href = "/"
+  }
+}
+
+function initializeClient() {
+  const gameOptions = { playerId, roomCode }
+  socket.emit("joinGame", gameOptions)
+}
+
+function setupToolListeners() {
+  // Tool selection
+  pencilTool?.addEventListener("click", () => setActiveTool("pencil"))
+  eraserTool?.addEventListener("click", () => setActiveTool("eraser"))
+  bucketTool?.addEventListener("click", () => setActiveTool("bucket"))
+  dropperTool?.addEventListener("click", () => setActiveTool("dropper"))
+
+  // Undo/Redo
+  undoBtn?.addEventListener("click", undoAction)
+  redoBtn?.addEventListener("click", redoAction)
+
+  // Brush size
+  brushSize?.addEventListener("input", changeBrushSize)
+
+  // Color swatches
+  colorSwatches.forEach((swatch) => {
+    swatch.addEventListener("click", () => {
+      const color = swatch.dataset.color
+      currentPos.color = color
+      lastColor = color
+      const penColor = document.querySelector("#pen-color")
+      penColor.value = color
+      updateSelectedSwatch(color)
+    })
+  })
+}
+
+// Declare io before using it
+const io = window.io
+
+// Initialize the game
+setupSocket()
+checkParameters()
+initializeClient()
+initTimer()
+setupToolListeners()
+
+// Set initial brush size
+changeBrushSize()
+
+// Set initial tool
+setActiveTool("pencil")
+
+// Save initial canvas state
+setTimeout(() => {
+  saveCanvasState()
+}, 500)
+
+// Add event listeners
+resetCanvaBtn?.addEventListener("click", onResetBtnClick)
+sendBtn?.addEventListener("click", onSubmitBtnClick)
+wordIpt?.addEventListener("keydown", guessEnter)
+
+gameCanvas?.addEventListener("mousedown", onMouseDown, false)
+gameCanvas?.addEventListener("mouseup", onMouseUp, false)
+gameCanvas?.addEventListener("mouseout", onMouseUp, false)
+gameCanvas?.addEventListener("mousemove", throttle(onMouseMove, 10), false)
+
+gameCanvas?.addEventListener("touchstart", onMouseDown, false)
+gameCanvas?.addEventListener("touchend", onMouseUp, false)
+gameCanvas?.addEventListener("touchcancel", onMouseUp, false)
+gameCanvas?.addEventListener("touchmove", throttle(onMouseMove, 10), false)
+
+// Add these event listeners at the end of the file where other event listeners are added
+prevDrawingBtn?.addEventListener("click", navigateToPrevDrawing)
+nextDrawingBtn?.addEventListener("click", navigateToNextDrawing)
+continueFromAlbumBtn?.addEventListener("click", continueFromAlbum)
+
+// Add event listeners for star ratings
+starRating.forEach((star) => {
+  star.addEventListener("click", function () {
+    const rating = Number.parseInt(this.dataset.rating)
+    rateDrawing(rating)
+  })
+})
+
+// Declare the variables
+let guessedRight
+let guessedWrong
+let showPointsIndicator
+let undoAction
+let redoAction

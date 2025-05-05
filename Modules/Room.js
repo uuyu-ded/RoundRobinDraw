@@ -21,32 +21,32 @@ class Room {
     this.totalRounds = 0 // Total number of rounds to play in copycat mode
     this.albumShown = false // Track if we've shown the album for the current round
     this.words = [
-      'Spaceship',
-      'Banana',
-      'Ghost',
-      'Mermaid',
-      'Volcano',
-      'Robot',
-      'Pizza',
-      'Castle',
-      'Dinosaur',
-      'Rainbow',
-      'Wizard',
-      'Dessert',
-      'Bomb',
-      'Island',
-      'Harmonica',
-      'Hamburger',
-      'Ben10',
-      'Romania',
-      'Birthday',
-      'Vendedor',
-      'Platypus',
-      'Zombie',
-      'Telescope',
-      'Couple',
-      'Cinema',
-      'Moonwalk',
+      "Spaceship",
+      "Banana",
+      "Ghost",
+      "Mermaid",
+      "Volcano",
+      "Robot",
+      "Pizza",
+      "Castle",
+      "Dinosaur",
+      "Rainbow",
+      "Wizard",
+      "Dessert",
+      "Bomb",
+      "Island",
+      "Harmonica",
+      "Hamburger",
+      "Ben10",
+      "Romania",
+      "Birthday",
+      "Vendedor",
+      "Platypus",
+      "Zombie",
+      "Telescope",
+      "Couple",
+      "Cinema",
+      "Moonwalk",
       "Mermaid",
       "Glinda",
       "Elpheba",
@@ -133,10 +133,72 @@ class Room {
   chooseWord() {
     if (this.gameMode === "guess") {
       if (!this.words || this.words.length === 0) {
-        return
+        // Reset the word list if it's empty
+        this.words = [
+          "Spaceship",
+          "Banana",
+          "Ghost",
+          "Mermaid",
+          "Volcano",
+          "Robot",
+          "Pizza",
+          "Castle",
+          "Dinosaur",
+          "Rainbow",
+          "Wizard",
+          "Dessert",
+          "Bomb",
+          "Island",
+          "Harmonica",
+          "Hamburger",
+          "Ben10",
+          "Romania",
+          "Birthday",
+          "Vendedor",
+          "Platypus",
+          "Zombie",
+          "Telescope",
+          "Couple",
+          "Cinema",
+          "Moonwalk",
+          "Mermaid",
+          "Glinda",
+          "Elpheba",
+          "Origami",
+          "Hourglass",
+          "Lirilli Larilla",
+          "Bonega Ambalabu",
+          "Tung tung tung tung sahur",
+          "Illuminati",
+          "Virus",
+          "Joker",
+          "John Pork",
+          "Pikachu",
+          "Mickey Mouse",
+          "Hamburger",
+          "Chiikawa",
+          "Iron Fist",
+          "Emma Frost",
+          "Iron Man",
+          "Cloak and Dagger",
+          "Tace cat",
+          "Saitama",
+          "Gojo",
+          "Labubu",
+          "Donald Trump",
+        ]
       }
+
+      // Get a random word index
       const wordIndex = RoomUtils.randomIndex(0, this.words.length - 1)
+
+      // Store the selected word
       this.word = this.words[wordIndex]
+
+      // Remove the used word from the array to prevent repetition
+      this.words = [...this.words.slice(0, wordIndex), ...this.words.slice(wordIndex + 1)]
+
+      console.log(`Selected word: ${this.word}, Remaining words: ${this.words.length}`)
     } else if (this.gameMode === "copycat") {
       // For copycat mode, we don't need a word
       if (this.copycatRound === 0) {
@@ -223,25 +285,21 @@ class Room {
       })
       this.everyoneReady = false
       if (this.copycatRound >= this.totalRounds) {
-        console.log(`[advanceCopycatRound] Game over - completed all rounds`);
-        return false;
+        console.log(`[advanceCopycatRound] Game over - completed all rounds`)
+        return false
       }
-      this.copycatRound++;
+      this.copycatRound++
 
       // Reset the albumShown flag for the new round
       this.albumShown = false
 
-
       if (this.copycatRound === 0) {
         this.copycatPhase = "drawing"
-      }
-
-      else if (this.copycatRound % 2 === 0) {
-        this.copycatPhase = "drawing";
-      }
-      else {
-        this.copycatPhase = "viewing";
-        this.viewingTimeRemaining = 20; // Reset viewing timer
+      } else if (this.copycatRound % 2 === 0) {
+        this.copycatPhase = "drawing"
+      } else {
+        this.copycatPhase = "viewing"
+        this.viewingTimeRemaining = 20 // Reset viewing timer
       }
 
       console.log(`[advanceCopycatRound] New round state: Round ${this.copycatRound}, Phase: ${this.copycatPhase}`)

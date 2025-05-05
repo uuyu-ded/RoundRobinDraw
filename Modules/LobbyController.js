@@ -430,6 +430,7 @@ class LobbyController {
     }, 1000)
   }
 
+  // Fix the newRound method to ensure proper word selection
   async newRound(io, roomCode) {
     this.io = io // Store io reference
     console.log(`Starting new round for room ${roomCode}`)
@@ -442,6 +443,11 @@ class LobbyController {
       return
     }
 
+    // Reset alreadyPointed flag for all players so they can earn points in the new round
+    currentRoom.players.forEach((player) => {
+      player.alreadyPointed = false
+    })
+
     if (currentRoom.gameMode === "guess") {
       // Original game mode
       console.log(`Room ${roomCode} is in guess mode, available drawers: ${currentRoom.availableDrawers.length}`)
@@ -451,6 +457,9 @@ class LobbyController {
         io.to(roomCode).emit("serverLog", `Game over: No more drawers available`)
         return
       }
+
+      // Setup the round with a new drawer and word
+      this.setupRound(roomCode)
     } else if (currentRoom.gameMode === "copycat") {
       // Copycat mode - check if we need to advance to the next round
       console.log(
@@ -461,38 +470,45 @@ class LobbyController {
         // Load all drawings from the previous round
         console.log(`Loading drawings from round ${currentRoom.copycatRound - 1} for viewing phase`)
         const previousRound = currentRoom.copycatRound - 1
-        const drawings = await Drawing.find({
-          roomCode: currentRoom.roomCode,
-          round: previousDrawingRound,
-        })
+        try {
+          const drawings = await Drawing.find({
+            roomCode: currentRoom.roomCode,
+            round: previousRound,
+          })
 
-        console.log(`Found ${drawings.length} drawings from previous round`)
+          console.log(`Found ${drawings.length} drawings from previous round`)
 
-        // Store them in the room for reference
-        currentRoom.copycatDrawings = {}
-        drawings.forEach((drawing) => {
-          currentRoom.copycatDrawings[drawing.playerNickname] = drawing.drawingData
-          console.log(`Stored drawing from player ${drawing.playerNickname}`)
-        })
+          // Store them in the room for reference
+          currentRoom.copycatDrawings = {}
+          drawings.forEach((drawing) => {
+            currentRoom.copycatDrawings[drawing.playerNickname] = drawing.drawingData
+            console.log(`Stored drawing from player ${drawing.playerNickname}`)
+          })
 
-        // Assign drawings to players
-        currentRoom.assignDrawingsToCopy();
-        console.log(`Assigned drawings to copy:`)
-        Object.entries(currentRoom.copycatAssignments).forEach(([player, source]) => {
-          console.log(`${player} will copy ${source}'s drawing`)
-        })
+          // Assign drawings to players
+          currentRoom.assignDrawingsToCopy()
+          console.log(`Assigned drawings to copy:`)
+          Object.entries(currentRoom.copycatAssignments).forEach(([player, source]) => {
+            console.log(`${player} will copy ${source}'s drawing`)
+          })
 
-        // Send each player their assigned drawing
-        for (const player of currentRoom.players) {
-          const sourceNickname = currentRoom.copycatAssignments[player.nickname];
-          if (sourceNickname && currentRoom.copycatDrawings[sourceNickname]) {
-            io.to(player.socketId).emit("drawingToCopy", {
-              drawingData: currentRoom.copycatDrawings[sourceNickname],
-              sourcePlayer: sourceNickname,
-            });
-            io.to(player.socketId).emit("serverLog", `Memorize ${sourceNickname}'s drawing!`);
+          // Send each player their assigned drawing
+          for (const player of currentRoom.players) {
+            const sourceNickname = currentRoom.copycatAssignments[player.nickname]
+            if (sourceNickname && currentRoom.copycatDrawings[sourceNickname]) {
+              io.to(player.socketId).emit("drawingToCopy", {
+                drawingData: currentRoom.copycatDrawings[sourceNickname],
+                sourcePlayer: sourceNickname,
+              })
+              io.to(player.socketId).emit("serverLog", `Memorize ${sourceNickname}'s drawing!`)
+            }
           }
+        } catch (error) {
+          console.error("Error fetching previous drawings:", error)
         }
+      } else {
+        // Setup the round for copycat mode
+        this.setupRound(roomCode)
       }
     }
 
